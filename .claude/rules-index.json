@@ -1,0 +1,47 @@
+{
+  "rules": {
+    "global": {
+      "file": ".claude/rules/global.md",
+      "priority": 1,
+      "alwaysApply": true,
+      "keywords": ["코딩스타일", "디렉토리구조", "일반규칙", "typescript", "nextjs"],
+      "description": "프로젝트 전반에 적용되는 개발 가이드라인"
+    },
+    "heroui": {
+      "file": ".claude/rules/heroui.md",
+      "priority": 2,
+      "keywords": ["ui", "component", "button", "input", "modal", "card", "form", "heroui", "스타일링"],
+      "triggers": ["@heroui", "컴포넌트", "UI", "폼", "디자인"],
+      "description": "HeroUI 컴포넌트 사용 가이드"
+    },
+    "auth": {
+      "file": ".claude/rules/auth.md",
+      "priority": 2,
+      "keywords": ["auth", "authentication", "nextauth", "login", "session", "인증", "로그인"],
+      "triggers": ["useSession", "getServerSession", "signIn", "signOut", "auth/"],
+      "description": "NextAuth 인증 시스템 가이드"
+    },
+    "supabase": {
+      "file": ".claude/rules/supabase.md",
+      "priority": 2,
+      "keywords": ["database", "supabase", "migration", "rls", "sql", "데이터베이스"],
+      "triggers": ["supabase", ".from(", "migration", "RLS", "CREATE TABLE"],
+      "description": "Supabase 데이터베이스 사용 가이드"
+    }
+  },
+  "quickPatterns": {
+    "clientComponent": "'use client';",
+    "pageParams": "params: Promise<{ id: string }>",
+    "heroUIImport": "import { Button } from '@heroui/button';",
+    "supabaseClient": "const supabase = createClient();",
+    "authSession": "const session = await getServerSession(authOptions);"
+  },
+  "commonTasks": {
+    "createComponent": ["global", "heroui"],
+    "createPage": ["global", "heroui", "auth"],
+    "createAPI": ["global", "auth", "supabase"],
+    "createMigration": ["supabase"],
+    "addAuth": ["auth", "supabase"],
+    "createForm": ["global", "heroui"]
+  }
+}

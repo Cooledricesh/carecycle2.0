@@ -1,0 +1,54 @@
+{
+  "workspace": {
+    "name": "CareCycle 2.0",
+    "type": "nextjs-app",
+    "claudeCodeVersion": "1.0.0"
+  },
+  "autoLoad": {
+    "rules": true,
+    "context": true,
+    "templates": true
+  },
+  "rulePriority": {
+    "enabled": true,
+    "order": [
+      ".claude/rules/global.md",
+      ".claude/context.md",
+      ".claude/rules-index.json"
+    ]
+  },
+  "contextAwareness": {
+    "filePatterns": {
+      "components/**/*.tsx": ["global", "heroui"],
+      "app/**/page.tsx": ["global", "heroui", "auth"],
+      "app/api/**/*.ts": ["global", "auth", "supabase"],
+      "supabase/migrations/*.sql": ["supabase"],
+      "lib/auth.ts": ["auth"],
+      "lib/supabase/*.ts": ["supabase"]
+    }
+  },
+  "codeGeneration": {
+    "autoApplyRules": true,
+    "templateMatching": true,
+    "contextInjection": true
+  },
+  "reminders": {
+    "preTask": [
+      "Check .claude/rules/ for relevant guidelines",
+      "Use 'use client' for all components",
+      "Verify UTF-8 encoding for Korean text"
+    ],
+    "postTask": [
+      "Run npm run lint to check code quality",
+      "Verify all imports are correct",
+      "Check if types are properly defined"
+    ]
+  },
+  "shortcuts": {
+    "rules": ".claude/rules/",
+    "templates": ".claude/templates/",
+    "components": "src/components/",
+    "features": "src/features/",
+    "migrations": "supabase/migrations/"
+  }
+}

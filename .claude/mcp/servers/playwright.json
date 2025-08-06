@@ -1,0 +1,170 @@
+{
+  "name": "playwright",
+  "description": "Playwright MCP Server for browser automation and testing",
+  "tools": {
+    "browser_navigate": {
+      "description": "Navigate to a URL",
+      "parameters": {
+        "url": "string"
+      }
+    },
+    "browser_click": {
+      "description": "Perform click on a web page",
+      "parameters": {
+        "element": "string",
+        "ref": "string",
+        "button": "left | right | middle (optional)",
+        "doubleClick": "boolean (optional)"
+      }
+    },
+    "browser_type": {
+      "description": "Type text into editable element",
+      "parameters": {
+        "element": "string",
+        "ref": "string",
+        "text": "string",
+        "slowly": "boolean (optional)",
+        "submit": "boolean (optional)"
+      }
+    },
+    "browser_snapshot": {
+      "description": "Capture accessibility snapshot of the current page",
+      "parameters": {}
+    },
+    "browser_take_screenshot": {
+      "description": "Take a screenshot of the current page",
+      "parameters": {
+        "element": "string (optional)",
+        "ref": "string (optional)",
+        "filename": "string (optional)",
+        "fullPage": "boolean (optional)",
+        "raw": "boolean (optional)"
+      }
+    },
+    "browser_evaluate": {
+      "description": "Evaluate JavaScript expression on page or element",
+      "parameters": {
+        "function": "string",
+        "element": "string (optional)",
+        "ref": "string (optional)"
+      }
+    },
+    "browser_press_key": {
+      "description": "Press a key on the keyboard",
+      "parameters": {
+        "key": "string"
+      }
+    },
+    "browser_hover": {
+      "description": "Hover over element on page",
+      "parameters": {
+        "element": "string",
+        "ref": "string"
+      }
+    },
+    "browser_select_option": {
+      "description": "Select an option in a dropdown",
+      "parameters": {
+        "element": "string",
+        "ref": "string",
+        "values": "array"
+      }
+    },
+    "browser_drag": {
+      "description": "Perform drag and drop between two elements",
+      "parameters": {
+        "startElement": "string",
+        "startRef": "string",
+        "endElement": "string",
+        "endRef": "string"
+      }
+    },
+    "browser_file_upload": {
+      "description": "Upload one or multiple files",
+      "parameters": {
+        "paths": "array"
+      }
+    },
+    "browser_wait_for": {
+      "description": "Wait for text to appear/disappear or time to pass",
+      "parameters": {
+        "text": "string (optional)",
+        "textGone": "string (optional)",
+        "time": "number (optional)"
+      }
+    },
+    "browser_console_messages": {
+      "description": "Returns all console messages",
+      "parameters": {}
+    },
+    "browser_network_requests": {
+      "description": "Returns all network requests since loading the page",
+      "parameters": {}
+    },
+    "browser_handle_dialog": {
+      "description": "Handle a dialog",
+      "parameters": {
+        "accept": "boolean",
+        "promptText": "string (optional)"
+      }
+    },
+    "browser_tab_list": {
+      "description": "List browser tabs",
+      "parameters": {}
+    },
+    "browser_tab_new": {
+      "description": "Open a new tab",
+      "parameters": {
+        "url": "string (optional)"
+      }
+    },
+    "browser_tab_select": {
+      "description": "Select a tab by index",
+      "parameters": {
+        "index": "number"
+      }
+    },
+    "browser_tab_close": {
+      "description": "Close a tab",
+      "parameters": {
+        "index": "number (optional)"
+      }
+    },
+    "browser_navigate_back": {
+      "description": "Go back to the previous page",
+      "parameters": {}
+    },
+    "browser_navigate_forward": {
+      "description": "Go forward to the next page",
+      "parameters": {}
+    },
+    "browser_resize": {
+      "description": "Resize the browser window",
+      "parameters": {
+        "width": "number",
+        "height": "number"
+      }
+    },
+    "browser_close": {
+      "description": "Close the page",
+      "parameters": {}
+    },
+    "browser_install": {
+      "description": "Install the browser specified in the config",
+      "parameters": {}
+    }
+  },
+  "usage": {
+    "setup": [
+      "1. Ensure Playwright is installed",
+      "2. Use browser_install if browser is not available",
+      "3. Start with browser_navigate to open a page"
+    ],
+    "testing_workflow": [
+      "browser_navigate → browser_snapshot to understand page",
+      "browser_click/browser_type for interactions",
+      "browser_take_screenshot for visual verification",
+      "browser_console_messages to check for errors"
+    ]
+  }
+}

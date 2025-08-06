@@ -1,0 +1,70 @@
+{
+  "project": {
+    "name": "CareCycle 2.0",
+    "type": "nextjs",
+    "framework": "next@15.1.0",
+    "language": "typescript",
+    "primaryLanguage": "ko"
+  },
+  "preferences": {
+    "codeStyle": {
+      "quotes": "single",
+      "semicolons": true,
+      "indentSize": 2,
+      "trailingComma": "es5",
+      "componentStyle": "arrow-function",
+      "useClientDirective": true
+    },
+    "testing": {
+      "framework": "jest",
+      "coverage": true,
+      "e2e": "playwright"
+    },
+    "linting": {
+      "enabled": true,
+      "autoFix": true,
+      "rules": "eslint-config-next"
+    }
+  },
+  "commands": {
+    "dev": "npm run dev",
+    "build": "npm run build",
+    "test": "npm test",
+    "lint": "npm run lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ui": "heroui",
+    "state": ["zustand", "@tanstack/react-query"],
+    "auth": "next-auth",
+    "database": "supabase",
+    "forms": "react-hook-form",
+    "validation": "zod",
+    "styling": ["tailwindcss@4", "heroui"]
+  },
+  "paths": {
+    "src": "./src",
+    "components": "./src/components",
+    "features": "./src/features",
+    "hooks": "./src/hooks",
+    "lib": "./src/lib",
+    "api": "./src/app/api",
+    "migrations": "./supabase/migrations"
+  },
+  "conventions": {
+    "fileNaming": "kebab-case",
+    "componentNaming": "PascalCase",
+    "functionNaming": "camelCase",
+    "constantNaming": "UPPER_SNAKE_CASE",
+    "folderStructure": "feature-based"
+  },
+  "aiAssistant": {
+    "contextAwareness": true,
+    "autoSuggestions": true,
+    "codeGeneration": {
+      "includeComments": false,
+      "includeTypes": true,
+      "preferFunctional": true
+    }
+  }
+}

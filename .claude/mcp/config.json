@@ -1,0 +1,73 @@
+{
+  "mcpServers": {
+    "vooster": {
+      "description": "Task management and PRD integration",
+      "capabilities": [
+        "list_projects",
+        "list_tasks",
+        "read_task",
+        "read_prd",
+        "get_next_task",
+        "add_tasks",
+        "update_task_status",
+        "update_subtask_status",
+        "sync_tasks_with_codebase",
+        "modify_task",
+        "download_all_task_files"
+      ],
+      "configuration": {
+        "projectRoot": ".",
+        "projectUid": "B85I"
+      }
+    },
+    "playwright": {
+      "description": "Browser automation and testing",
+      "capabilities": [
+        "browser_navigate",
+        "browser_click",
+        "browser_type",
+        "browser_snapshot",
+        "browser_take_screenshot",
+        "browser_evaluate",
+        "browser_console_messages",
+        "browser_network_requests"
+      ]
+    },
+    "supabase": {
+      "description": "Database management and operations",
+      "capabilities": [
+        "execute_sql",
+        "apply_migration",
+        "list_tables",
+        "list_extensions",
+        "list_migrations",
+        "create_branch",
+        "deploy_edge_function",
+        "search_docs"
+      ],
+      "configuration": {
+        "projectRef": "REPLACE_WITH_YOUR_PROJECT_REF",
+        "apiKey": "REPLACE_WITH_YOUR_API_KEY"
+      }
+    },
+    "ide": {
+      "description": "IDE integration for diagnostics and code execution",
+      "capabilities": [
+        "getDiagnostics",
+        "executeCode"
+      ]
+    },
+    "context7": {
+      "description": "Library documentation and code examples",
+      "capabilities": [
+        "resolve-library-id",
+        "get-library-docs"
+      ]
+    }
+  },
+  "settings": {
+    "enabled": true,
+    "autoConnect": true,
+    "defaultTimeout": 30000
+  }
+}

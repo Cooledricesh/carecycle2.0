@@ -1,0 +1,37 @@
+{
+  "name": "ide",
+  "description": "IDE MCP Server for VS Code diagnostics and code execution",
+  "tools": {
+    "getDiagnostics": {
+      "description": "Get language diagnostics from VS Code",
+      "parameters": {
+        "uri": "string (optional)"
+      },
+      "returns": "Array of diagnostic messages with severity, message, and location"
+    },
+    "executeCode": {
+      "description": "Execute python code in the Jupyter kernel for the current notebook file",
+      "parameters": {
+        "code": "string"
+      },
+      "notes": [
+        "All code will be executed in the current Jupyter kernel",
+        "Code execution persists across calls unless kernel is restarted",
+        "Avoid declaring variables unless explicitly requested"
+      ]
+    }
+  },
+  "usage": {
+    "diagnostics": [
+      "Use getDiagnostics() to get all diagnostics",
+      "Use getDiagnostics(uri) for specific file diagnostics",
+      "Check for errors, warnings, and info messages"
+    ],
+    "code_execution": [
+      "Only for Jupyter notebook files",
+      "Execute Python code in the active kernel",
+      "State persists between executions",
+      "Use for data analysis and visualization"
+    ]
+  }
+}

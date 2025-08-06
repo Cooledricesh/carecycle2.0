@@ -1,0 +1,130 @@
+{
+  "name": "supabase",
+  "description": "Supabase MCP Server for database management and operations",
+  "tools": {
+    "execute_sql": {
+      "description": "Executes raw SQL in the Postgres database",
+      "parameters": {
+        "query": "string"
+      }
+    },
+    "apply_migration": {
+      "description": "Applies a migration to the database (for DDL operations)",
+      "parameters": {
+        "name": "string",
+        "query": "string"
+      }
+    },
+    "list_tables": {
+      "description": "Lists all tables in one or more schemas",
+      "parameters": {
+        "schemas": "array (optional, defaults to ['public'])"
+      }
+    },
+    "list_extensions": {
+      "description": "Lists all extensions in the database",
+      "parameters": {}
+    },
+    "list_migrations": {
+      "description": "Lists all migrations in the database",
+      "parameters": {}
+    },
+    "create_branch": {
+      "description": "Creates a development branch on a Supabase project",
+      "parameters": {
+        "confirm_cost_id": "string",
+        "name": "string (optional, defaults to 'develop')"
+      }
+    },
+    "list_branches": {
+      "description": "Lists all development branches of a Supabase project",
+      "parameters": {}
+    },
+    "delete_branch": {
+      "description": "Deletes a development branch",
+      "parameters": {
+        "branch_id": "string"
+      }
+    },
+    "merge_branch": {
+      "description": "Merges migrations and edge functions from a development branch to production",
+      "parameters": {
+        "branch_id": "string"
+      }
+    },
+    "reset_branch": {
+      "description": "Resets migrations of a development branch",
+      "parameters": {
+        "branch_id": "string",
+        "migration_version": "string (optional)"
+      }
+    },
+    "rebase_branch": {
+      "description": "Rebases a development branch on production",
+      "parameters": {
+        "branch_id": "string"
+      }
+    },
+    "list_edge_functions": {
+      "description": "Lists all Edge Functions in a Supabase project",
+      "parameters": {}
+    },
+    "deploy_edge_function": {
+      "description": "Deploys an Edge Function to a Supabase project",
+      "parameters": {
+        "name": "string",
+        "files": "array",
+        "entrypoint_path": "string (optional, defaults to 'index.ts')",
+        "import_map_path": "string (optional)"
+      }
+    },
+    "get_logs": {
+      "description": "Gets logs for a Supabase project by service type",
+      "parameters": {
+        "service": "api | branch-action | postgres | edge-function | auth | storage | realtime"
+      }
+    },
+    "get_advisors": {
+      "description": "Gets advisory notices for the Supabase project",
+      "parameters": {
+        "type": "security | performance"
+      }
+    },
+    "get_project_url": {
+      "description": "Gets the API URL for a project",
+      "parameters": {}
+    },
+    "get_anon_key": {
+      "description": "Gets the anonymous API key for a project",
+      "parameters": {}
+    },
+    "generate_typescript_types": {
+      "description": "Generates TypeScript types for a project",
+      "parameters": {}
+    },
+    "search_docs": {
+      "description": "Search the Supabase documentation using GraphQL",
+      "parameters": {
+        "graphql_query": "string"
+      }
+    }
+  },
+  "usage": {
+    "setup": [
+      "1. Configure Supabase project reference and API key",
+      "2. Update .env with SUPABASE_URL and SUPABASE_ANON_KEY",
+      "3. Use list_tables to explore database structure"
+    ],
+    "migration_workflow": [
+      "list_migrations to see current migrations",
+      "apply_migration for DDL changes",
+      "execute_sql for data queries",
+      "get_advisors to check for security/performance issues"
+    ],
+    "edge_function_workflow": [
+      "list_edge_functions to see existing functions",
+      "deploy_edge_function to create/update functions",
+      "get_logs with service='edge-function' to debug"
+    ]
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "name": "vooster-ai",
+  "description": "Vooster AI MCP Server for task and project management",
+  "tools": {
+    "list_projects": {
+      "description": "Lists all projects for the user",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string"
+      }
+    },
+    "list_task": {
+      "description": "Lists all tasks for the connected project",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string"
+      }
+    },
+    "read_task": {
+      "description": "Reads detailed information of a specific task",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string",
+        "taskId": "string"
+      }
+    },
+    "read_prd": {
+      "description": "Reads the PRD (Product Requirements Document) for the connected project",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string"
+      }
+    },
+    "get_next_task": {
+      "description": "Gets the next priority task based on importance, urgency, and creation date",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string"
+      }
+    },
+    "add_tasks": {
+      "description": "Manually adds new tasks to the project",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string",
+        "tasks": "array"
+      }
+    },
+    "update_task_status": {
+      "description": "Updates the status of a task (BACKLOG | IN_PROGRESS | DONE)",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string",
+        "taskId": "string",
+        "status": "string",
+        "completionDetails": "string (required for DONE)",
+        "confidenceLevel": "number (required for DONE)",
+        "confidenceDetails": "string (required for DONE)"
+      }
+    },
+    "update_subtask_status": {
+      "description": "Updates the status of a sub-task",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string",
+        "taskId": "string",
+        "subTaskUid": "string",
+        "status": "string"
+      }
+    },
+    "sync_tasks_with_codebase": {
+      "description": "Automatically updates completed tasks to DONE status through codebase analysis",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string",
+        "taskIds": "array"
+      }
+    },
+    "modify_task": {
+      "description": "Modifies existing task information",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string",
+        "taskId": "string",
+        "summary": "string (optional)",
+        "aiPrompt": "string (optional)",
+        "importance": "string (optional)",
+        "urgency": "number (optional)",
+        "complexity": "number (optional)"
+      }
+    },
+    "download_all_task_files": {
+      "description": "Downloads all tasks in the connected project as local files",
+      "parameters": {
+        "projectRoot": "string",
+        "projectUid": "string"
+      }
+    }
+  },
+  "usage": {
+    "setup": [
+      "1. Get your project UID from Vooster AI dashboard",
+      "2. Update the projectUid in .claude/mcp/config.json",
+      "3. Use 'get_next_task' to fetch priority tasks",
+      "4. Update task status as you complete work"
+    ],
+    "workflow": [
+      "get_next_task → work on task → update_task_status(IN_PROGRESS)",
+      "Complete implementation → update_task_status(DONE)",
+      "Check sub-tasks → update_subtask_status as needed"
+    ]
+  }
+}
