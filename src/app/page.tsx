@@ -39,7 +39,7 @@ export default function Home() {
             <p className="text-muted-foreground mb-4">
               오늘의 검사·주사 일정을 확인하고 시행 여부를 체크합니다
             </p>
-            <Link href="/schedules">
+            <Link href="/schedule">
               <Button variant="outline" className="w-full">일정 확인하기</Button>
             </Link>
           </div>
