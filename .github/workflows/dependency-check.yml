@@ -65,26 +65,26 @@ jobs:
                 repo: context.repo.repo,
                 title: title,
                 body: `## 📦 Dependency Update Report
-                
-This is an automated weekly check of project dependencies.
-
-### Actions Required:
-1. Review outdated packages
-2. Check for security vulnerabilities
-3. Plan updates for critical packages
-
-### Reports:
-- See the [workflow run summary](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details
-- Run \`npm outdated\` locally for full report
-- Run \`npm audit\` for security details
-
-### Priority Updates:
-- Framework updates (Next.js, React)
-- Security patches
-- Major version updates requiring migration
-
----
-*This issue was automatically created by the dependency check workflow.*`,
+                  
+                  This is an automated weekly check of project dependencies.
+                  
+                  ### Actions Required:
+                  1. Review outdated packages
+                  2. Check for security vulnerabilities
+                  3. Plan updates for critical packages
+                  
+                  ### Reports:
+                  - See the [workflow run summary](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details
+                  - Run \`npm outdated\` locally for full report
+                  - Run \`npm audit\` for security details
+                  
+                  ### Priority Updates:
+                  - Framework updates (Next.js, React)
+                  - Security patches
+                  - Major version updates requiring migration
+                  
+                  ---
+                  *This issue was automatically created by the dependency check workflow.*`,
                 labels: ['dependencies', 'automated', 'maintenance']
               });
             }

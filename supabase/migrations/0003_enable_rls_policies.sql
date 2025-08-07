@@ -73,7 +73,17 @@ CREATE POLICY "Schedule history can be deleted by authenticated users"
   USING (auth.role() = 'authenticated');
 
 -- Add unique constraint to items.name if not exists
-ALTER TABLE items ADD CONSTRAINT items_name_unique UNIQUE (name);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 
+    FROM pg_constraint 
+    WHERE conname = 'items_name_unique' 
+    AND conrelid = 'items'::regclass
+  ) THEN
+    ALTER TABLE items ADD CONSTRAINT items_name_unique UNIQUE (name);
+  END IF;
+END $$;
 
 -- Insert sample items data
 INSERT INTO items (name, type, period_value, period_unit) VALUES

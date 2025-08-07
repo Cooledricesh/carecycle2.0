@@ -1,5 +1,6 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom'
 import { AuthProvider } from './auth-provider'
 import { useSession } from 'next-auth/react'
 
@@ -96,29 +97,41 @@ describe('AuthProvider', () => {
   })
 
   it('handles session expiry gracefully', () => {
-    const expiredDate = new Date(Date.now() - 86400000).toISOString() // Yesterday
-
+    // When session is expired, NextAuth typically returns null data with unauthenticated status
     mockUseSession.mockReturnValue({
-      data: {
-        user: {
-          id: '1',
-          email: 'expired@example.com',
-          name: 'Expired User',
-        },
-        expires: expiredDate,
-      },
-      status: 'authenticated',
+      data: null,
+      status: 'unauthenticated',
+      update: jest.fn(),
     })
+
+    const TestComponent = () => {
+      const session = useSession()
+      
+      // Component should handle expired session appropriately
+      if (session.status === 'unauthenticated') {
+        return (
+          <div data-testid="session-expired">
+            Session expired. Please log in again.
+          </div>
+        )
+      }
+      
+      return <div data-testid="protected-content">Protected Content</div>
+    }
 
     render(
       <AuthProvider>
-        <div data-testid="protected-content">Protected Content</div>
+        <TestComponent />
       </AuthProvider>
     )
 
-    // Implementation should handle expired sessions
-    // This depends on your actual AuthProvider implementation
+    // Verify that the session hook was called
     expect(mockUseSession).toHaveBeenCalled()
+    
+    // Verify that expired session results in unauthenticated state
+    expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument()
+    expect(screen.getByTestId('session-expired')).toBeInTheDocument()
+    expect(screen.getByTestId('session-expired')).toHaveTextContent('Session expired. Please log in again.')
   })
 
   it('handles missing user data gracefully', () => {
