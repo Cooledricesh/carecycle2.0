@@ -6,6 +6,35 @@
         "-y",
         "@executeautomation/playwright-mcp-server"
       ]
+    },
+    "context7-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@upstash/context7-mcp",
+        "--key",
+        "07de5cda-e1b8-4639-b6ca-53a01b9d81b8"
+      ]
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_83fbb7df78adbd82fbda8f91c26eee07ebd3984d"
+      ]
+    },
+    "vooster-ai": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "--package=@vooster/mcp@latest",
+        "vooster-ai",
+        "--api-key=ak_ab3stnvqi2rm5lhtlin1rxp8"
+      ]
     }
   }
 }
