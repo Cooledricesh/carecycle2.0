@@ -17,6 +17,13 @@ interface EventProps {
   [key: string]: any;
 }
 
+/**
+ * Provides analytics tracking functions for Google Analytics and Microsoft Clarity.
+ *
+ * Returns an object with methods to track events, page views, user properties, conversions, custom Clarity events, form submissions, errors, and timing metrics. All methods are safe to use in React components and guard against execution in non-browser environments.
+ *
+ * @returns An object containing analytics tracking methods for use in React components.
+ */
 export function useAnalytics() {
   // Google Analytics event tracking
   const trackEvent = useCallback((props: EventProps) => {

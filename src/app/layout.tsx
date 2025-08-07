@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   description: '효율적인 환자 일정 및 치료 관리 솔루션',
 };
 
+/**
+ * Root layout component that sets up global providers, error boundaries, and analytics for the application.
+ *
+ * Wraps all page content with font styles, context providers, authentication, and error handling. Also injects analytics tracking using environment-specific IDs.
+ *
+ * @param children - The content to be rendered within the layout
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

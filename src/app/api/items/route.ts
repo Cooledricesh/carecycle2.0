@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+/**
+ * Handles GET requests to retrieve all active items from the database.
+ *
+ * Queries the 'items' table for records where 'is_active' is true, ordering results by 'type' and 'name'. Returns the items as a JSON array, or an error response with details if the query fails.
+ */
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();

@@ -7,7 +7,11 @@ class SentryExampleAPIError extends Error {
     this.name = "SentryExampleAPIError";
   }
 }
-// A faulty API route to test Sentry's error monitoring
+/**
+ * API route handler that intentionally throws a backend error for Sentry monitoring tests.
+ *
+ * @throws SentryExampleAPIError Always thrown to simulate a backend failure.
+ */
 export function GET() {
   throw new SentryExampleAPIError("This error is raised on the backend called by the example page.");
   return NextResponse.json({ data: "Testing Sentry Error..." });

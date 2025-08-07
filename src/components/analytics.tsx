@@ -8,6 +8,14 @@ interface AnalyticsProps {
   clarityId?: string;
 }
 
+/**
+ * Conditionally integrates Google Analytics and Microsoft Clarity tracking based on provided IDs.
+ *
+ * Renders the Google Analytics component if `gaId` is supplied, and injects the Microsoft Clarity tracking script if `clarityId` is provided.
+ *
+ * @param gaId - Google Analytics tracking ID
+ * @param clarityId - Microsoft Clarity project ID
+ */
 export function Analytics({ gaId, clarityId }: AnalyticsProps) {
   return (
     <>

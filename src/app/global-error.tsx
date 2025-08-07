@@ -4,6 +4,14 @@ import * as Sentry from "@sentry/nextjs";
 import NextError from "next/error";
 import { useEffect } from "react";
 
+/**
+ * React component for handling and reporting global errors in a Next.js application.
+ *
+ * Reports the provided error to Sentry and displays a generic error page using the default Next.js error component.
+ *
+ * @param error - The error object to report and display, optionally containing a `digest` property.
+ * @returns The rendered error page UI.
+ */
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
     Sentry.captureException(error);

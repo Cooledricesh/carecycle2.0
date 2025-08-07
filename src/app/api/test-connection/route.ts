@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+/**
+ * Handles a GET request to test the connection to the Supabase database.
+ *
+ * Performs a simple query on the `items` table to verify connectivity and checks the presence of required environment variables. Returns a JSON response indicating success or failure, including relevant details and environment variable statuses.
+ *
+ * @returns A JSON response with the result of the connection test, including success status, message or error details, item count if successful, and environment variable presence flags.
+ */
 export async function GET(request: NextRequest) {
   try {
     console.log('Testing Supabase connection...');
