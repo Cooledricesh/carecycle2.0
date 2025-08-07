@@ -418,3 +418,10 @@ const { data, error } = await supabase
 - @vooster-docs/clean-code.md
 - @vooster-docs/git-commit-message.md
 </vooster-docs>
+
+## Security Notes
+
+### Supabase API Key Management
+- **2025 Update**: Use new Supabase API key format (sb_publishable_*, sb_secret_*)
+- Do NOT use legacy anon keys or service role keys
+- Always refer to the latest Supabase documentation for key management best practices
