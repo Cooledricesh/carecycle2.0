@@ -40,16 +40,20 @@ describe('Input', () => {
   })
 
   it('supports different input types', () => {
-    const { rerender } = render(<Input type="email" />)
-    let input = screen.getByRole('textbox')
+    // Test email input - can use getByRole('textbox') for email type
+    const { rerender } = render(<Input type="email" placeholder="Email" />)
+    let input = screen.getByPlaceholderText('Email')
     expect(input).toHaveAttribute('type', 'email')
     
-    rerender(<Input type="password" />)
-    input = screen.getByRole('textbox')
+    // Test password input - Note: password inputs cannot be queried with getByRole('textbox')
+    // Use getByPlaceholderText or getByLabelText instead
+    rerender(<Input type="password" placeholder="Password" />)
+    input = screen.getByPlaceholderText('Password')
     expect(input).toHaveAttribute('type', 'password')
     
-    rerender(<Input type="number" />)
-    input = screen.getByRole('spinbutton')
+    // Test number input - can use getByRole('spinbutton') for number type
+    rerender(<Input type="number" placeholder="Number" />)
+    input = screen.getByPlaceholderText('Number')
     expect(input).toHaveAttribute('type', 'number')
   })
 
