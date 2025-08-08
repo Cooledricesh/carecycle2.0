@@ -554,3 +554,74 @@ logger.fatal("Database connection pool exhausted", {
   activeConnections: 100,
 });
 ```
+
+## Playwright E2E Testing Procedure
+
+### Setup and Run Tests with Background Server
+```bash
+# 1. Check and kill existing processes on ports
+lsof -ti:3000 | xargs kill -9 2>/dev/null
+lsof -ti:3001 | xargs kill -9 2>/dev/null
+echo "Ports cleared"
+
+# 2. Start development server in background
+nohup npm run dev > /tmp/nextjs.log 2>&1 & echo $!
+
+# 3. Wait for server startup and verify
+sleep 5 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
+
+# 4. Run Playwright tests
+# Use mcp__playwright tools for testing
+```
+
+### Example Playwright Test Flow
+```javascript
+// Navigate to page
+mcp__playwright__playwright_navigate({ url: "http://localhost:3000", headless: false })
+
+// Take screenshot
+mcp__playwright__playwright_screenshot({ name: "homepage", fullPage: true })
+
+// Click element
+mcp__playwright__playwright_click({ selector: "a[href='/dashboard']" })
+
+// Close browser when done
+mcp__playwright__playwright_close()
+```
+
+## Supabase SQL Execution Methods
+
+### Method 1: Via Supabase Management API (Recommended)
+```bash
+curl -X POST \
+  "https://api.supabase.com/v1/projects/[PROJECT_REF]/database/query" \
+  -H "Authorization: Bearer [SUPABASE_ACCESS_TOKEN]" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "YOUR SQL QUERY HERE"
+  }'
+```
+
+### Method 2: Using Environment Variables
+```bash
+# Extract project reference from .env.local
+PROJECT_REF=$(grep NEXT_PUBLIC_SUPABASE_URL .env.local | cut -d'/' -f3 | cut -d'.' -f1)
+
+# Get access token from .env.local
+ACCESS_TOKEN=$(grep SUPABASE_ACCESS_TOKEN .env.local | cut -d'=' -f2)
+
+# Execute SQL
+curl -X POST \
+  "https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "ALTER TABLE schedule_history ADD COLUMN IF NOT EXISTS actual_completion_date DATE;"
+  }'
+```
+
+### Important Notes
+- New Supabase key format (2025): `sb_publishable_*`, `sb_secret_*`
+- Management API token: `sbp_*` format
+- Always use `IF NOT EXISTS` clauses in ALTER TABLE statements
+- Response `[]` indicates successful execution

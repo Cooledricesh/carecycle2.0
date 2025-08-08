@@ -2,6 +2,7 @@
 
 import React from 'react';
 import * as Sentry from '@sentry/nextjs';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 interface ErrorBoundaryProps {
@@ -12,6 +13,48 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+}
+
+// Default error fallback component that uses Next.js router
+function DefaultErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
+  const router = useRouter();
+
+  const handleGoHome = () => {
+    router.push('/');
+    resetError();
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="max-w-md text-center">
+        <h1 className="mb-4 text-2xl font-bold">문제가 발생했습니다</h1>
+        <p className="mb-6 text-muted-foreground">
+          예기치 않은 오류가 발생했습니다. 문제가 지속되면 지원팀에 문의해주세요.
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Button onClick={resetError}>
+            다시 시도
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={handleGoHome}
+          >
+            홈으로 이동
+          </Button>
+        </div>
+        {process.env.NODE_ENV === 'development' && (
+          <details className="mt-8 text-left">
+            <summary className="cursor-pointer text-sm text-muted-foreground">
+              오류 세부정보 (개발 모드)
+            </summary>
+            <pre className="mt-2 overflow-auto rounded bg-muted p-4 text-xs">
+              {error.stack}
+            </pre>
+          </details>
+        )}
+      </div>
+    </div>
+  );
 }
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -56,37 +99,12 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
         );
       }
 
-      // Default error UI
+      // Use the DefaultErrorFallback component which has access to the router
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center p-4">
-          <div className="max-w-md text-center">
-            <h1 className="mb-4 text-2xl font-bold">문제가 발생했습니다</h1>
-            <p className="mb-6 text-muted-foreground">
-              예기치 않은 오류가 발생했습니다. 문제가 지속되면 지원팀에 문의해주세요.
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Button onClick={this.resetError}>
-                다시 시도
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => window.location.href = '/'}
-              >
-                홈으로 이동
-              </Button>
-            </div>
-            {process.env.NODE_ENV === 'development' && (
-              <details className="mt-8 text-left">
-                <summary className="cursor-pointer text-sm text-muted-foreground">
-                  오류 세부정보 (개발 모드)
-                </summary>
-                <pre className="mt-2 overflow-auto rounded bg-muted p-4 text-xs">
-                  {this.state.error.stack}
-                </pre>
-              </details>
-            )}
-          </div>
-        </div>
+        <DefaultErrorFallback
+          error={this.state.error}
+          resetError={this.resetError}
+        />
       );
     }
 

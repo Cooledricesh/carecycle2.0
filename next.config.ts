@@ -24,11 +24,19 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Check if all required Sentry environment variables are present
+const hasSentryEnv = Boolean(
+  process.env.NEXT_PUBLIC_SENTRY_DSN &&
+  process.env.SENTRY_AUTH_TOKEN &&
+  process.env.SENTRY_ORG &&
+  process.env.SENTRY_PROJECT
+);
+
 // Sentry configuration options
 const sentryWebpackPluginOptions = {
-  // Organization and project from environment variables
-  org: process.env.SENTRY_ORG || "baclava",
-  project: process.env.SENTRY_PROJECT || "javascript-nextjs",
+  // Organization and project from environment variables (no defaults)
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
   
   // Auth token for uploading source maps
   authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -61,7 +69,7 @@ const sentryWebpackPluginOptions = {
   },
 };
 
-// Export with Sentry wrapper only if DSN is configured
-export default process.env.NEXT_PUBLIC_SENTRY_DSN
+// Export with Sentry wrapper only if all required environment variables are configured
+export default hasSentryEnv
   ? withSentryConfig(nextConfig, sentryWebpackPluginOptions)
   : nextConfig;

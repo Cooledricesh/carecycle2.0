@@ -63,8 +63,216 @@
   * {
     border-color: hsl(var(--border));
   }
+  
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
   }
+
+  /* Animated Gradient Background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Subtle medical-grade background (static, no animation) */
+    background: linear-gradient(
+      180deg,
+      #f8fafc 0%,
+      #eef2ff 35%,
+      #f1f5f9 100%
+    );
+    background-size: cover;
+    opacity: 0.06;
+    z-index: -2;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Soft vignette for depth */
+    background: radial-gradient(
+      ellipse at top left,
+      rgba(2, 132, 199, 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(15, 118, 110, 0.08),
+      transparent 55%
+    );
+    z-index: -1;
+  }
+
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Glass Effect for Cards */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow: 0 6px 16px rgba(2, 6, 23, 0.06);
+  }
+
+  .dark .glass-card {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.24);
+  }
+
+  /* Neon Glow Effects */
+  .neon-purple {
+    box-shadow: 0 4px 12px rgba(2, 6, 23, 0.08);
+  }
+
+  .neon-pink {
+    box-shadow: 0 4px 12px rgba(2, 6, 23, 0.08);
+  }
+
+  .neon-blue {
+    box-shadow: 0 4px 12px rgba(2, 6, 23, 0.08);
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+  }
+
+  /* Shimmer Effect */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background-size: 800px 100%;
+    animation: shimmer 6s infinite;
+  }
+
+  /* Pulse Glow */
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  /* Morphing Blob */
+  @keyframes morph {
+    0%, 100% {
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    }
+    50% {
+      border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    }
+  }
+
+  .blob {
+    animation: morph 8s ease-in-out infinite;
+  }
+
+  /* Rainbow Border */
+  @keyframes rainbow {
+    0%, 100% {
+      border-color: #ff0080;
+    }
+    20% {
+      border-color: #ff8c00;
+    }
+    40% {
+      border-color: #ffd700;
+    }
+    60% {
+      border-color: #00ff00;
+    }
+    80% {
+      border-color: #00ffff;
+    }
+  }
+
+  .rainbow-border {
+    animation: rainbow 5s linear infinite;
+    border-width: 3px;
+    border-style: solid;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #f0f0f0, #e0e0e0);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #764ba2, #f093fb);
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #f093fb, #f5576c);
+  background-clip: content-box;
 }

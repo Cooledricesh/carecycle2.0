@@ -4,6 +4,36 @@
 
 This document outlines the comprehensive health improvements implemented for the CareCycle 2.0 project.
 
+## 🚨 Breaking Changes
+
+### Major Dependency Upgrades
+- **Next.js 15.1.0 → 15.4.6**: Requires Node 18.18+ and may affect custom server configurations
+- **@supabase/ssr 0.5.2 → 0.6.1**: New API key format required (sb_publishable_* instead of anon keys)
+- **React Types**: Pinned to 18.3.3 for HeroUI compatibility
+
+### Environment Variable Changes
+- **SUPABASE_ANON_KEY** → **NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY** (new Supabase key format)
+- **New Required Variables**:
+  - `SENTRY_DSN`: Error tracking configuration
+  - `SENTRY_AUTH_TOKEN`: Build-time source map upload
+  - `NEXT_PUBLIC_GTAG_ID`: Google Analytics tracking
+  - `NEXT_PUBLIC_CLARITY_ID`: Microsoft Clarity analytics
+
+### Configuration Updates
+- **Tailwind CSS v4**: Now using @tailwindcss/postcss with new configuration format
+- **TypeScript**: strictNullChecks disabled for flexibility with HeroUI
+- **ESLint**: Errors ignored during production builds for faster deployment
+
+### API & Authentication Changes
+- **NextAuth JWT Strategy**: Session now stored in cookies instead of server-side
+- **Supabase RLS**: All tables now require Row Level Security policies
+- **API Routes**: Must use new App Router API conventions (route.ts files)
+
+### Build & Development Changes
+- **Turbopack**: Now default for development (npm run dev uses --turbo flag)
+- **Test Requirements**: Jest setup now requires specific Next.js mocks
+- **CI/CD**: GitHub Actions workflows require new repository secrets
+
 ## ✅ Completed Improvements
 
 ### 1. 🧪 Test Infrastructure
