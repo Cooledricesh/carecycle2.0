@@ -20,7 +20,7 @@ export async function POST() {
       
       const { data: columnData, error: checkError } = await supabase
         .rpc('exec_sql', { sql: checkColumnSql })
-        .single();
+        .maybeSingle();
 
       if (!checkError && columnData && Array.isArray(columnData) && columnData.length > 0) {
         columnExists = true;
@@ -76,7 +76,7 @@ export async function POST() {
       // Use Supabase's built-in SQL execution
       const { error: sqlError } = await supabase
         .rpc('exec_sql', { sql: alterSql })
-        .single();
+        .maybeSingle();
 
       if (sqlError) {
         console.error('Error adding column via RPC:', sqlError);
@@ -115,7 +115,7 @@ export async function POST() {
       
       const { data: verifyData, error: verifyError } = await supabase
         .rpc('exec_sql', { sql: verifyColumnSql })
-        .single();
+        .maybeSingle();
 
       if (!verifyError && verifyData && Array.isArray(verifyData) && verifyData.length > 0) {
         verificationPassed = true;
@@ -183,7 +183,7 @@ export async function GET() {
       
       const { data: columnData, error: checkError } = await supabase
         .rpc('exec_sql', { sql: checkColumnSql })
-        .single();
+        .maybeSingle();
 
       if (!checkError && columnData && Array.isArray(columnData) && columnData.length > 0) {
         columnExists = true;
