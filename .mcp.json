@@ -6,6 +6,27 @@
         "-y",
         "@executeautomation/playwright-mcp-server"
       ]
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=bqilsbkjqzqnxnvjssif"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_79c7e21ee7e7cc9f55a85c64ce3150b821f223d7"
+      }
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {
+        "CONTEXT7_KEY": "07de5cda-e1b8-4639-b6ca-53a01b9d81b8"
+      }
     }
   }
 }
