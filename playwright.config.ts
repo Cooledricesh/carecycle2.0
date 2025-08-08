@@ -13,8 +13,7 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    reducedMotion: 'reduce'
+    video: 'retain-on-failure'
   },
   webServer: {
     command: process.env.CI ? 'npm run start -- -p 3000' : 'npm run dev -- -p 3000',
