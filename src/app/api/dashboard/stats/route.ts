@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createPureClient } from '@/lib/supabase/server';
+import { createErrorResponse } from '@/lib/api-errors';
 
 import type { DashboardStatsResponse } from '@/types/dashboard';
+import type { TypedSupabaseClient, CompletionRateDates } from '@/types/supabase-helpers';
 
 export async function GET() {
   try {
@@ -75,18 +77,15 @@ export async function GET() {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Dashboard stats API error:', error);
-    return NextResponse.json(
-      { 
-        error: 'Failed to fetch dashboard statistics',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
+    return createErrorResponse(
+      error,
+      500,
+      'Failed to fetch dashboard statistics'
     );
   }
 }
 
-async function calculateCompletionRates(supabase: any, dates: { today: string; weekStart: string; monthStart: string }) {
+async function calculateCompletionRates(supabase: TypedSupabaseClient, dates: CompletionRateDates) {
   try {
     // Today's completion rate
     const { data: todayScheduled, error: todayScheduledError } = await supabase

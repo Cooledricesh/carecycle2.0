@@ -18,11 +18,15 @@ BEGIN
     RETURN NULL;
   END IF;
 
-  -- Calculate next date based on period unit
-  IF v_period_unit = 'weeks' THEN
+  -- Calculate next date based on period unit (case-insensitive, handles singular/plural)
+  IF LOWER(v_period_unit) IN ('week', 'weeks') THEN
     v_next_date := p_base_date + (v_period_value || ' weeks')::INTERVAL;
-  ELSIF v_period_unit = 'months' THEN
+  ELSIF LOWER(v_period_unit) IN ('month', 'months') THEN
     v_next_date := p_base_date + (v_period_value || ' months')::INTERVAL;
+  ELSIF LOWER(v_period_unit) IN ('day', 'days') THEN
+    v_next_date := p_base_date + (v_period_value || ' days')::INTERVAL;
+  ELSIF LOWER(v_period_unit) IN ('year', 'years') THEN
+    v_next_date := p_base_date + (v_period_value || ' years')::INTERVAL;
   ELSE
     v_next_date := NULL;
   END IF;
@@ -85,12 +89,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger on schedule_history table
-DROP TRIGGER IF EXISTS auto_recalculate_schedule ON schedule_history;
-CREATE TRIGGER auto_recalculate_schedule
-  AFTER INSERT OR UPDATE ON schedule_history
-  FOR EACH ROW
-  EXECUTE FUNCTION trigger_recalculate_next_schedule();
+-- Create trigger on schedule_history table (idempotent approach)
+DO $$
+BEGIN
+  -- Check if trigger exists before creating
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'auto_recalculate_schedule' 
+    AND tgrelid = 'schedule_history'::regclass
+  ) THEN
+    CREATE TRIGGER auto_recalculate_schedule
+      AFTER INSERT OR UPDATE ON schedule_history
+      FOR EACH ROW
+      EXECUTE FUNCTION trigger_recalculate_next_schedule();
+  END IF;
+END;
+$$;
 
 -- Grant necessary permissions
 GRANT EXECUTE ON FUNCTION calculate_next_due_date TO authenticated;

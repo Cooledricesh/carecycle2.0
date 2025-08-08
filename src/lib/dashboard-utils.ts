@@ -4,6 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import { format, startOfWeek, startOfMonth } from 'date-fns';
 
 export interface DateRange {
   start: string;
@@ -14,22 +15,19 @@ export interface DateRange {
  * Get formatted date ranges for dashboard calculations
  */
 export function getDashboardDateRanges() {
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const today = format(now, 'yyyy-MM-dd');
   
   // Week start (Monday)
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
-  const weekStartStr = weekStart.toISOString().split('T')[0];
+  const weekStart = format(startOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd');
   
   // Month start
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  const monthStartStr = monthStart.toISOString().split('T')[0];
+  const monthStart = format(startOfMonth(now), 'yyyy-MM-dd');
 
   return {
     today,
-    weekStart: weekStartStr,
-    monthStart: monthStartStr
+    weekStart,
+    monthStart
   };
 }
 

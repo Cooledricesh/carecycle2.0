@@ -159,6 +159,8 @@ export default function Navigation() {
                     as={NextLink}
                     href={item.href}
                     className="relative group"
+                    role="link"
+                    aria-current={isActive(item.href) ? 'page' : undefined}
                   >
                     <div className={`
                       flex items-center space-x-2 px-4 py-2.5 rounded-2xl
@@ -179,6 +181,7 @@ export default function Navigation() {
                           color={item.badge === 'new' ? 'success' : 'danger'}
                           variant="shadow"
                           className="absolute -top-2 -right-2"
+                          aria-label={`${item.label} - ${item.badge === 'new' ? '새 기능' : `${item.badge}개 알림`}`}
                         >
                           {item.badge}
                         </Badge>
@@ -217,8 +220,10 @@ export default function Navigation() {
                 content: "text-green-700 dark:text-green-300 font-medium text-xs",
                 dot: "bg-green-500 animate-pulse"
               }}
+              role="status"
+              aria-live="polite"
             >
-              시스템 정상
+              <span aria-label="시스템 상태: 정상">시스템 정상</span>
             </Chip>
           </motion.div>
         </NavbarItem>
@@ -226,8 +231,12 @@ export default function Navigation() {
         {/* Performance Indicator */}
         <NavbarItem className="hidden md:flex">
           <Tooltip content="오늘의 성과">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800">
-              <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <div 
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800"
+              role="status"
+              aria-label="오늘의 성과: 24% 증가"
+            >
+              <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400" aria-hidden="true" />
               <span className="text-xs font-bold text-amber-700 dark:text-amber-300">+24%</span>
             </div>
           </Tooltip>
@@ -241,8 +250,9 @@ export default function Navigation() {
               size="sm"
               isIconOnly
               className="text-slate-600 dark:text-slate-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20"
+              aria-label={`알림 ${notifications}개`}
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-5 h-5" aria-hidden="true" />
             </Button>
           </Badge>
         </NavbarItem>
@@ -262,7 +272,7 @@ export default function Navigation() {
                 size="sm"
                 isIconOnly
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                aria-label="테마 전환"
+                aria-label={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
                 className={`
                   shadow-lg transform hover:scale-110 transition-all duration-300
                   ${
@@ -394,13 +404,17 @@ export default function Navigation() {
               </div>
               
               {/* System Status */}
-              <div className="p-3 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
+              <div 
+                className="p-3 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800"
+                role="status"
+                aria-live="polite"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-green-600 dark:text-green-400 animate-pulse" />
+                    <Activity className="w-4 h-4 text-green-600 dark:text-green-400 animate-pulse" aria-hidden="true" />
                     <span className="text-sm font-medium text-green-700 dark:text-green-300">시스템 정상</span>
                   </div>
-                  <Chip size="sm" color="success" variant="flat">실시간</Chip>
+                  <Chip size="sm" color="success" variant="flat" aria-label="실시간 모니터링 중">실시간</Chip>
                 </div>
               </div>
               

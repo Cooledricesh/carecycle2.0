@@ -30,7 +30,7 @@ describe('PatientRegistrationForm', () => {
       json: async () => []
     })
     
-    render(<PatientRegistrationForm />)
+    const { container } = render(<PatientRegistrationForm />)
     
     // Wait for component to load
     await waitFor(() => {
@@ -55,14 +55,15 @@ describe('PatientRegistrationForm', () => {
       ]
     })
     
-    render(<PatientRegistrationForm />)
+    const { container } = render(<PatientRegistrationForm />)
     
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /환자 등록/i })).toBeInTheDocument()
     })
     
-    const submitButton = screen.getByRole('button', { name: /환자 등록/i })
-    fireEvent.click(submitButton)
+    // Submit the form directly to avoid button ripple side-effects in tests
+    const formEl = container.querySelector('form') as HTMLFormElement
+    fireEvent.submit(formEl)
     
     await waitFor(() => {
       // Check for validation error messages
@@ -84,7 +85,7 @@ describe('PatientRegistrationForm', () => {
         json: async () => ({ id: '123', message: 'Patient registered successfully' }),
       })
 
-    render(<PatientRegistrationForm />)
+    const { container } = render(<PatientRegistrationForm />)
     
     await waitFor(() => {
       expect(screen.getByLabelText(/환자 번호/i)).toBeInTheDocument()
@@ -98,21 +99,22 @@ describe('PatientRegistrationForm', () => {
       target: { value: '홍길동' },
     })
     
-    // Select an item (checkbox) 
+    // Select an item (checkbox)
     const checkbox = await screen.findByRole('checkbox')
     fireEvent.click(checkbox)
     
     // Wait for date field to appear and fill it
     await waitFor(() => {
-      const dateInput = screen.getByDisplayValue('')
-      fireEvent.change(dateInput, {
-        target: { value: '2024-01-01' },
-      })
+      const dateInput = container.querySelector('input[type="date"]') as HTMLInputElement | null
+      expect(dateInput).not.toBeNull()
+      if (dateInput) {
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+      }
     })
     
-    // Submit the form
-    const submitButton = screen.getByRole('button', { name: /환자 등록/i })
-    fireEvent.click(submitButton)
+    // Submit the form directly to avoid button ripple side-effects in tests
+    const formEl = container.querySelector('form') as HTMLFormElement
+    fireEvent.submit(formEl)
     
     await waitFor(() => {
       // Check if API was called - the second call should be the submission
@@ -149,7 +151,7 @@ describe('PatientRegistrationForm', () => {
       })
       .mockRejectedValueOnce(new Error('Network error'))
 
-    render(<PatientRegistrationForm />)
+    const { container } = render(<PatientRegistrationForm />)
     
     await waitFor(() => {
       expect(screen.getByLabelText(/환자 번호/i)).toBeInTheDocument()
@@ -169,15 +171,16 @@ describe('PatientRegistrationForm', () => {
     
     // Wait for date field to appear and fill it
     await waitFor(() => {
-      const dateInput = screen.getByDisplayValue('')
-      fireEvent.change(dateInput, {
-        target: { value: '2024-01-01' },
-      })
+      const dateInput = container.querySelector('input[type="date"]') as HTMLInputElement | null
+      expect(dateInput).not.toBeNull()
+      if (dateInput) {
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+      }
     })
     
-    // Submit the form
-    const submitButton = screen.getByRole('button', { name: /환자 등록/i })
-    fireEvent.click(submitButton)
+    // Submit the form directly to avoid button ripple side-effects in tests
+    const formEl = container.querySelector('form') as HTMLFormElement
+    fireEvent.submit(formEl)
     
     await waitFor(() => {
       // Check if error toast was shown

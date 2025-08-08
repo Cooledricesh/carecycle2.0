@@ -1,4 +1,5 @@
 // Dashboard API Response Types
+import { z } from 'zod';
 
 export interface DashboardStatsResponse {
   totalPatients: number;
@@ -63,3 +64,32 @@ export interface DashboardErrorResponse {
   error: string;
   message: string;
 }
+
+// Database row types (Zod) for strongly-typed Supabase results
+export const RecentActivityRowSchema = z.object({
+  id: z.string(),
+  scheduled_date: z.string(),
+  completed_date: z.string().nullable(),
+  actual_completion_date: z.string().nullable().optional(),
+  status: z.enum(['pending', 'completed', 'skipped']),
+  notes: z.string().nullable().optional(),
+  patient_schedules: z
+    .object({
+      id: z.string(),
+      patients: z
+        .object({
+          name: z.string(),
+          patient_number: z.string(),
+        })
+        .optional(),
+      items: z
+        .object({
+          name: z.string(),
+          type: z.enum(['test', 'injection']),
+        })
+        .optional(),
+    })
+    .optional(),
+});
+
+export type RecentActivityRow = z.infer<typeof RecentActivityRowSchema>;
