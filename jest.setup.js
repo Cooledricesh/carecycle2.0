@@ -39,26 +39,30 @@ jest.mock('next-auth/react', () => ({
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
 process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-key'
 
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-})
-
-// Mock ResizeObserver
-class ResizeObserverMock {
-  observe = jest.fn()
-  unobserve = jest.fn()
-  disconnect = jest.fn()
+// Mock window.matchMedia (only in jsdom environment)
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  })
 }
 
-global.ResizeObserver = ResizeObserverMock
+// Mock ResizeObserver (only in jsdom environment)
+if (typeof global !== 'undefined') {
+  class ResizeObserverMock {
+    observe = jest.fn()
+    unobserve = jest.fn()
+    disconnect = jest.fn()
+  }
+
+  global.ResizeObserver = global.ResizeObserver || ResizeObserverMock
+}
