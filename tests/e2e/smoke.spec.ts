@@ -29,6 +29,7 @@ test.describe('Smoke Tests', () => {
     });
     
     // Check if page loads with success status
+    expect(response).toBeDefined();
     expect(response?.status()).toBeLessThan(400);
     
     // Wait for and verify meaningful accessibility landmarks
@@ -75,6 +76,7 @@ test.describe('Smoke Tests', () => {
     });
     
     // Verify HTTP status code
+    expect(response).toBeDefined();
     expect(response?.status()).toBeLessThan(400);
     
     // Verify current URL
