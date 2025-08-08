@@ -3,8 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 // Supabase test client setup - using service role key for testing to bypass RLS
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bqilsbkjqzqnxnvjssif.supabase.co';
 // For tests, we need the service role key to bypass RLS
-const supabaseKey = process.env.SUPABASE_SECRET_KEY || 
-                    'sb_secret_yImuLCsoA5ayWwNpXpDH1Q_u16QzZPy';
+const supabaseKey = process.env.SUPABASE_SECRET_KEY;
+
+if (!supabaseKey) {
+  throw new Error('SUPABASE_SECRET_KEY environment variable is required for testing but was not provided. This key should be injected via environment variables for security.');
+}
 
 export const supabaseTestClient = createClient(supabaseUrl, supabaseKey);
 
@@ -198,6 +201,6 @@ export async function getUpcomingSchedules() {
     return data || [];
   } catch (error) {
     console.error('Failed to get upcoming schedules:', error);
-    return [];
+    throw error;
   }
 }

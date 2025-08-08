@@ -108,7 +108,18 @@ export class PatientRegistrationPage extends BasePage {
   async selectMultipleItems(indices: number[]): Promise<void> {
     for (const index of indices) {
       await this.selectManagementItem(index);
-      await this.page.waitForTimeout(500); // Allow UI to update
+      
+      // Wait for UI to update by checking for date inputs to appear
+      // (since selecting items should make date inputs visible)
+      try {
+        await expect(this.dateInputs.nth(index)).toBeVisible({ timeout: 3000 });
+      } catch {
+        // If the specific date input doesn't appear, at least ensure the UI has settled
+        await this.page.waitForFunction(
+          () => !document.querySelector('[class*="loading"], [class*="spinner"]'),
+          { timeout: 2000 }
+        );
+      }
     }
   }
 
@@ -124,16 +135,16 @@ export class PatientRegistrationPage extends BasePage {
   }
 
   async fillAllDateInputs(date: string): Promise<void> {
-    await this.page.waitForTimeout(1000); // Wait for date inputs to appear
+    // Wait for date inputs to appear after item selection
+    await expect(this.dateInputs.first()).toBeVisible({ timeout: 5000 });
     
     const dateInputs = this.dateInputs;
     const inputCount = await dateInputs.count();
     
     for (let i = 0; i < inputCount; i++) {
       const dateInput = dateInputs.nth(i);
-      if (await dateInput.isVisible()) {
-        await dateInput.fill(date);
-      }
+      await expect(dateInput).toBeVisible();
+      await dateInput.fill(date);
     }
   }
 
@@ -149,22 +160,55 @@ export class PatientRegistrationPage extends BasePage {
     await this.selectMultipleItems(itemIndices);
     
     // Use tomorrow's date if no date provided
-    if (!date) {
+    let dateToUse = date;
+    if (!dateToUse) {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      date = tomorrow.toISOString().split('T')[0];
+      dateToUse = tomorrow.toISOString().split('T')[0] || '';
     }
     
-    await this.fillAllDateInputs(date);
+    await this.fillAllDateInputs(dateToUse);
     await this.submitForm();
   }
 
   async waitForFormSubmission(): Promise<void> {
-    // Wait for loading state
-    const hasLoading = await this.loadingIndicator.isVisible({ timeout: 1000 }).catch(() => false);
-    
-    if (hasLoading) {
-      await expect(this.loadingIndicator).toBeHidden({ timeout: 10000 });
+    // Wait for loading state or network activity to complete
+    try {
+      // First, check if there's a loading indicator and wait for it to disappear
+      const hasLoading = await this.loadingIndicator.isVisible({ timeout: 1000 }).catch(() => false);
+      
+      if (hasLoading) {
+        await expect(this.loadingIndicator).toBeHidden({ timeout: 10000 });
+      }
+      
+      // Additionally, wait for network requests to settle
+      await this.page.waitForLoadState('networkidle', { timeout: 5000 });
+      
+    } catch (networkError) {
+      // If networkidle fails, fall back to waiting for either success or error message
+      await this.page.waitForFunction(
+        () => {
+          const successElement = document.querySelector('[role="alert"], .toast, .notification');
+          const errorElement = document.querySelector('[role="alert"], .error');
+          
+          if (successElement) {
+            const successText = successElement.textContent || '';
+            if (/성공|success|등록되었습니다|registered/i.test(successText)) {
+              return true;
+            }
+          }
+          
+          if (errorElement) {
+            const errorText = errorElement.textContent || '';
+            if (/오류|error|실패|failed/i.test(errorText)) {
+              return true;
+            }
+          }
+          
+          return false;
+        },
+        { timeout: 10000 }
+      );
     }
   }
 
@@ -221,14 +265,37 @@ export class PatientRegistrationPage extends BasePage {
     // Wait for success message
     await expect(this.successMessage).toBeVisible({ timeout: 10000 });
     
-    // Form should be reset or redirected
-    await this.page.waitForTimeout(1000);
-    
-    // Check if form was reset
-    const patientNumberValue = await this.patientNumberInput.inputValue().catch(() => '');
-    const patientNameValue = await this.patientNameInput.inputValue().catch(() => '');
-    
-    expect(patientNumberValue === '' || patientNameValue === '').toBeTruthy();
+    // Wait for either form reset or navigation away from form
+    try {
+      // Option 1: Wait for form fields to be reset (both empty)
+      await this.page.waitForFunction(
+        () => {
+          const patientNumberInput = document.querySelector('input[name="patientNumber"], input[placeholder*="환자 번호"], input[placeholder*="Patient Number"]') as HTMLInputElement;
+          const patientNameInput = document.querySelector('input[name="name"], input[name="patientName"], input[placeholder*="이름"], input[placeholder*="name"]') as HTMLInputElement;
+          
+          // Return true if both fields are empty (form was reset)
+          return patientNumberInput?.value === '' && patientNameInput?.value === '';
+        },
+        { timeout: 5000 }
+      );
+      
+      // Verify both input fields are actually empty after form reset
+      await expect(this.patientNumberInput).toHaveValue('');
+      await expect(this.patientNameInput).toHaveValue('');
+      
+    } catch (resetError) {
+      // Option 2: Check if we were redirected away from the registration form
+      const currentUrl = this.page.url();
+      const isOnRegistrationPage = currentUrl.includes('/register') || currentUrl.includes('/patients');
+      
+      if (isOnRegistrationPage) {
+        // If still on registration page but form wasn't reset, this is an error
+        throw new Error(`Form was not reset after successful registration. Current URL: ${currentUrl}`);
+      }
+      
+      // If we're on a different page (e.g., redirected to patient list), that's also success
+      console.log(`Successfully redirected after registration to: ${currentUrl}`);
+    }
   }
 
   async verifyErrorHandling(): Promise<void> {
@@ -300,7 +367,7 @@ export class PatientRegistrationPage extends BasePage {
     // Test date input
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const dateStr = tomorrow.toISOString().split('T')[0];
+    const dateStr = tomorrow.toISOString().split('T')[0] || '';
     
     await this.fillFirstDate(0, dateStr);
     await expect(this.dateInputs.first()).toHaveValue(dateStr);

@@ -11,12 +11,18 @@ import {
   mockEnvironmentVariables,
 } from '@/lib/test-utils';
 
-// Mock dependencies
-const mockSupabaseClient = {
-  from: jest.fn(),
-};
+// Mock dependencies - create fresh instances in beforeEach
+let mockSupabaseClient: any;
+let mockCreatePureClient: jest.Mock;
 
-const mockCreatePureClient = jest.fn().mockResolvedValue(mockSupabaseClient);
+// Factory function to create fresh mock instances
+const createMockSupabaseClient = () => ({
+  from: jest.fn(),
+});
+
+// Initialize mocks - will be reset in beforeEach
+mockSupabaseClient = createMockSupabaseClient();
+mockCreatePureClient = jest.fn().mockResolvedValue(mockSupabaseClient);
 
 jest.mock('@/lib/supabase/server', () => ({
   createPureClient: () => mockCreatePureClient(),
@@ -24,22 +30,6 @@ jest.mock('@/lib/supabase/server', () => ({
 
 // Mock Date for consistent testing
 const FIXED_DATE = new Date('2024-12-20T12:00:00Z');
-
-// Override the global Date with our mock
-const OriginalDate = Date;
-global.Date = class extends Date {
-  constructor(...args: any[]) {
-    if (args.length === 0) {
-      super(FIXED_DATE);
-    } else {
-      super(...args as []);
-    }
-  }
-  
-  static now() {
-    return FIXED_DATE.getTime();
-  }
-} as any;
 
 describe('/api/dashboard/test', () => {
   const consoleSpies = mockConsole();
@@ -50,10 +40,16 @@ describe('/api/dashboard/test', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+    jest.setSystemTime(FIXED_DATE);
+    
+    // Create fresh mock instances
+    mockSupabaseClient = createMockSupabaseClient();
+    mockCreatePureClient = jest.fn().mockResolvedValue(mockSupabaseClient);
   });
 
-  afterAll(() => {
-    global.Date = OriginalDate;
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('Successful GET request', () => {
@@ -554,14 +550,26 @@ describe('/api/dashboard/test', () => {
     });
 
     it('should have consistent response structure on success', async () => {
-      const mockQuery = {
+      // Mock for connectivity test
+      const mockConnectQuery = {
         select: jest.fn().mockReturnValue({
-          limit: jest.fn().mockResolvedValue(createMockSupabaseResponse([])),
-          count: jest.fn().mockResolvedValue(createMockSupabaseResponse(null, null, 0))
+          limit: jest.fn().mockResolvedValue(createMockSupabaseResponse(null, null, 0))
         })
       };
 
-      mockSupabaseClient.from.mockReturnValue(mockQuery);
+      // Mock for table queries
+      const mockTableQuery = {
+        select: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValue(createMockSupabaseResponse([]))
+        })
+      };
+
+      mockSupabaseClient.from
+        .mockReturnValueOnce(mockConnectQuery)  // patients connectivity test
+        .mockReturnValueOnce(mockTableQuery)     // patients table test
+        .mockReturnValueOnce(mockTableQuery)     // items table test
+        .mockReturnValueOnce(mockTableQuery)     // patient_schedules table test
+        .mockReturnValueOnce(mockTableQuery);    // schedule_history table test
 
       const response = await GET();
       const responseData = await response.json();

@@ -3,7 +3,6 @@
  */
 
 import { NextResponse } from 'next/server';
-import { GET } from './route';
 import {
   createMockSupabaseResponse,
   createMockDatabaseError,
@@ -14,14 +13,22 @@ import {
   mockEnvironmentVariables,
 } from '@/lib/test-utils';
 
-// Mock dependencies
-const mockSupabaseClient = {
-  from: jest.fn(),
-};
+// Mock dependencies - create fresh instances in beforeEach
+let mockSupabaseClient: any;
+let mockCreatePureClient: jest.Mock;
+let mockCreateErrorResponse: jest.Mock;
+let mockGetServerSession: jest.Mock;
 
-const mockCreatePureClient = jest.fn().mockResolvedValue(mockSupabaseClient);
-const mockCreateErrorResponse = jest.fn();
-const mockGetServerSession = jest.fn();
+// Factory function to create fresh mock instances
+const createMockSupabaseClient = () => ({
+  from: jest.fn(),
+});
+
+// Initialize mocks - will be reset in beforeEach
+mockSupabaseClient = createMockSupabaseClient();
+mockCreatePureClient = jest.fn().mockResolvedValue(mockSupabaseClient);
+mockCreateErrorResponse = jest.fn();
+mockGetServerSession = jest.fn();
 
 jest.mock('@/lib/supabase/server', () => ({
   createPureClient: () => mockCreatePureClient(),
@@ -41,13 +48,23 @@ jest.mock('@/lib/auth', () => ({
 
 // Mock Date for consistent testing
 const FIXED_DATE = new Date('2024-12-20T12:00:00Z');
-const dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => FIXED_DATE.getTime());
-jest.spyOn(global, 'Date').mockImplementation(((...args: any[]) => {
+const OriginalDate = Date; // Save the original Date constructor
+
+// Create a mock Date constructor that preserves static methods
+const MockDate = jest.fn(((...args: any[]) => {
   if (args.length === 0) {
     return FIXED_DATE;
   }
-  return new (Date as any)(...args);
+  return new OriginalDate(...args);
 }) as any);
+
+// Copy static methods from original Date
+MockDate.now = jest.fn(() => FIXED_DATE.getTime());
+MockDate.parse = OriginalDate.parse;
+MockDate.UTC = OriginalDate.UTC;
+
+// Replace global Date with our mock
+global.Date = MockDate as any;
 
 describe('/api/dashboard/recent', () => {
   const consoleSpies = mockConsole();
@@ -56,22 +73,39 @@ describe('/api/dashboard/recent', () => {
     NODE_ENV: 'test',
   });
 
+  // Helper function to get fresh GET import with proper Date mock
+  const getRoute = async () => {
+    // Reset modules but preserve our Date mock
+    jest.resetModules();
+    
+    // Re-apply Date mock before importing
+    global.Date = MockDate as any;
+    
+    const module = await import('./route');
+    return module.GET;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCreateErrorResponse.mockReturnValue(
+    
+    // Create fresh mock instances
+    mockSupabaseClient = createMockSupabaseClient();
+    mockCreatePureClient = jest.fn().mockResolvedValue(mockSupabaseClient);
+    mockCreateErrorResponse = jest.fn().mockReturnValue(
       NextResponse.json({ error: 'Test error' }, { status: 500 })
     );
-    mockGetServerSession.mockResolvedValue(createMockSession());
+    mockGetServerSession = jest.fn().mockResolvedValue(createMockSession());
   });
 
   afterAll(() => {
-    dateNowSpy.mockRestore();
+    global.Date = OriginalDate;
   });
 
   describe('Authentication', () => {
     it('should return 401 when no session exists', async () => {
       mockGetServerSession.mockResolvedValue(null);
 
+      const GET = await getRoute();
       const response = await GET();
 
       expect(response.status).toBe(401);
@@ -84,6 +118,7 @@ describe('/api/dashboard/recent', () => {
         user: { id: '', email: 'test@example.com', name: 'Test User', image: null }
       }));
 
+      const GET = await getRoute();
       const response = await GET();
 
       expect(response.status).toBe(401);
@@ -134,6 +169,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       const response = await GET();
       
       expect(response.status).toBe(200);
@@ -258,6 +294,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       const response = await GET();
       const responseData = await response.json();
 
@@ -352,6 +389,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       const response = await GET();
       const responseData = await response.json();
 
@@ -426,6 +464,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       const response = await GET();
       const responseData = await response.json();
 
@@ -510,6 +549,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       const response = await GET();
       const responseData = await response.json();
 
@@ -558,6 +598,7 @@ describe('/api/dashboard/recent', () => {
 
       mockSupabaseClient.from.mockReturnValueOnce(mockRecentQuery);
 
+      const GET = await getRoute();
       await GET();
 
       expect(mockCreateErrorResponse).toHaveBeenCalledWith(
@@ -598,6 +639,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockRecentQuery)
         .mockReturnValueOnce(mockUpcomingQuery);
 
+      const GET = await getRoute();
       await GET();
 
       expect(mockCreateErrorResponse).toHaveBeenCalledWith(
@@ -651,6 +693,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       await GET();
 
       expect(mockCreateErrorResponse).toHaveBeenCalledWith(
@@ -685,6 +728,7 @@ describe('/api/dashboard/recent', () => {
 
       mockSupabaseClient.from.mockReturnValueOnce(mockRecentQuery);
 
+      const GET = await getRoute();
       await GET();
 
       expect(mockCreateErrorResponse).toHaveBeenCalledWith(
@@ -697,6 +741,7 @@ describe('/api/dashboard/recent', () => {
     it('should handle Supabase client creation error', async () => {
       mockCreatePureClient.mockRejectedValueOnce(new Error('Supabase unavailable'));
 
+      const GET = await getRoute();
       await GET();
 
       expect(mockCreateErrorResponse).toHaveBeenCalledWith(
@@ -709,6 +754,7 @@ describe('/api/dashboard/recent', () => {
     it('should handle session retrieval error', async () => {
       mockGetServerSession.mockRejectedValueOnce(new Error('Session error'));
 
+      const GET = await getRoute();
       await GET();
 
       expect(mockCreateErrorResponse).toHaveBeenCalledWith(
@@ -723,6 +769,7 @@ describe('/api/dashboard/recent', () => {
         throw new Error('Unexpected error');
       });
 
+      const GET = await getRoute();
       await GET();
 
       expect(mockCreateErrorResponse).toHaveBeenCalledWith(
@@ -799,6 +846,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       const response = await GET();
       const responseData = await response.json();
 
@@ -850,6 +898,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       await GET();
 
       // Verify upcoming schedules query uses correct date range
@@ -932,6 +981,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       const response = await GET();
       const responseData = await response.json();
 
@@ -1011,6 +1061,7 @@ describe('/api/dashboard/recent', () => {
         .mockReturnValueOnce(mockUpcomingQuery)
         .mockReturnValueOnce(mockHistoryQuery);
 
+      const GET = await getRoute();
       const response = await GET();
       const responseData = await response.json();
 

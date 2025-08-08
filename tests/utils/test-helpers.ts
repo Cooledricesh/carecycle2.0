@@ -1,4 +1,6 @@
 import { Page, expect, Locator } from '@playwright/test';
+import { format, differenceInDays } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
 // Enhanced test helpers with better error handling and retry logic
 
@@ -74,7 +76,9 @@ export async function clickElement(page: Page, selector: string, timeout = 10000
         console.error(`Failed to click after ${retries} attempts: ${selector}`);
         return false;
       }
-      await page.waitForTimeout(1000); // Wait before retry
+      // Wait for element to be available for interaction again before retry
+      await page.waitForSelector(selector, { state: 'attached', timeout: 2000 }).catch(() => {});
+      await page.waitForSelector(selector, { state: 'visible', timeout: 1000 }).catch(() => {});
     }
   }
   return false;
@@ -92,9 +96,11 @@ export async function clickElementWithFallback(page: Page, selector: string, tim
     if (await element.isVisible()) {
       const box = await element.boundingBox();
       if (box) {
-        await page.click({
-          x: box.x + box.width / 2,
-          y: box.y + box.height / 2
+        await page.click('body', {
+          position: {
+            x: box.x + box.width / 2,
+            y: box.y + box.height / 2
+          }
         });
         return true;
       }
@@ -622,28 +628,26 @@ export async function testDataPersistence(page: Page, dataSetup: () => Promise<v
   return { persistsRefresh, persistsNavigation, persistsNewTab };
 }
 
-// Format date for display
+// Format date for display using date-fns
 export function formatDateForDisplay(date: Date): string {
-  const options: Intl.DateTimeFormatOptions = {
-    month: 'numeric',
-    day: 'numeric',
-    weekday: 'short'
-  };
-  return date.toLocaleDateString('ko-KR', options);
+  // Create a new Date object to avoid mutations
+  const immutableDate = new Date(date.getTime());
+  return format(immutableDate, 'M월 d일 (EEE)', { locale: ko });
 }
 
-// Calculate days until due
+// Calculate days until due using date-fns (immutable)
 export function calculateDaysUntilDue(dueDate: Date): string {
+  // Create immutable date objects to avoid mutations
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  dueDate.setHours(0, 0, 0, 0);
+  const immutableToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const immutableDueDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
   
-  const diffTime = dueDate.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = differenceInDays(immutableDueDate, immutableToday);
   
   if (diffDays === 0) return '오늘';
   if (diffDays === 1) return '내일';
   if (diffDays === 2) return '모레';
+  if (diffDays < 0) return `${Math.abs(diffDays)}일 지남`;
   return `${diffDays}일 후`;
 }
 
