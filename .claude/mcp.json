@@ -1,12 +1,5 @@
 {
   "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@executeautomation/playwright-mcp-server"
-      ]
-    },
     "supabase": {
       "command": "npx",
       "args": [
@@ -17,6 +10,29 @@
       "env": {
         "SUPABASE_ACCESS_TOKEN": "sbp_79c7e21ee7e7cc9f55a85c64ce3150b821f223d7"
       }
+    },
+    "vooster": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@vooster/mcp-server@latest"
+      ],
+      "env": {
+        "VOOSTER_API_KEY": "ak_ab3stnvqi2rm5lhtlin1rxp8"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "ide": {
+      "command": "node",
+      "args": [
+        "/path/to/ide-mcp-server"
+      ]
     },
     "context7": {
       "command": "npx",
