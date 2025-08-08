@@ -1,32 +1,42 @@
 'use client';
 
-import { useEffect, useState, createContext, useContext } from 'react';
+import { useEffect, useState, createContext, useContext, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Toaster, toast } from 'sonner';
 import { Bell } from 'lucide-react';
-
-interface NotificationContextType {
-  unreadCount: number;
-  notifications: any[];
-  markAsRead: (id: string) => void;
-  refreshNotifications: () => void;
-}
+import type { 
+  Notification, 
+  NotificationContextType, 
+  RealtimePayload,
+  RealtimeEventType 
+} from '@/types/notifications';
+import type { PatientScheduleWithRelations } from '@/types/supabase';
+import { NotificationSchema } from '@/types/notifications';
 
 const NotificationContext = createContext<NotificationContextType>({
   unreadCount: 0,
   notifications: [],
-  markAsRead: () => {},
-  refreshNotifications: () => {},
+  isLoading: false,
+  error: null,
+  markAsRead: async () => {},
+  markAllAsRead: async () => {},
+  refreshNotifications: async () => {},
+  dismissNotification: async () => {},
+  updateNotificationSettings: async () => {},
 });
 
 export const useNotifications = () => useContext(NotificationContext);
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const supabase = createClient();
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       // Get upcoming schedules that need notification
       const today = new Date();
@@ -54,15 +64,43 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         .order('next_due_date', { ascending: true });
 
       if (!error && data) {
-        setNotifications(data);
-        setUnreadCount(data.filter(n => !n.is_notified).length);
+        // Validate and transform data
+        const validNotifications = data.map(item => ({
+          id: item.id,
+          patient_id: item.patient?.id ?? '',
+          item_id: item.item?.id ?? '',
+          next_due_date: item.next_due_date,
+          is_notified: item.is_notified ?? false,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          patient: item.patient ? {
+            id: item.patient.id ?? '',
+            name: item.patient.name,
+            patient_number: item.patient.patient_number,
+          } : undefined,
+          item: item.item ? {
+            id: item.item.id ?? '',
+            name: item.item.name,
+            type: item.item.type as 'test' | 'injection',
+            period_value: 0,
+            period_unit: 'weeks' as const,
+          } : undefined,
+        } as Notification));
+        
+        setNotifications(validNotifications);
+        setUnreadCount(validNotifications.filter(n => !n.is_notified).length);
       }
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err : new Error('Failed to fetch notifications');
+      console.error('Failed to fetch notifications:', errorMessage);
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [supabase]);
 
-  const markAsRead = async (id: string) => {
+  const markAsRead = useCallback(async (id: string) => {
     try {
       await supabase
         .from('patient_schedules')
@@ -73,14 +111,61 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         prev.map(n => n.id === id ? { ...n, is_notified: true } : n)
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err : new Error('Failed to mark notification as read');
+      console.error('Failed to mark notification as read:', errorMessage);
+      setError(errorMessage);
     }
-  };
+  }, [supabase]);
 
-  const refreshNotifications = () => {
-    fetchNotifications();
-  };
+  const markAllAsRead = useCallback(async () => {
+    try {
+      const unreadIds = notifications.filter(n => !n.is_notified).map(n => n.id);
+      if (unreadIds.length === 0) return;
+      
+      await supabase
+        .from('patient_schedules')
+        .update({ is_notified: true })
+        .in('id', unreadIds);
+      
+      setNotifications(prev => 
+        prev.map(n => ({ ...n, is_notified: true }))
+      );
+      setUnreadCount(0);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err : new Error('Failed to mark all as read');
+      console.error('Failed to mark all as read:', errorMessage);
+      setError(errorMessage);
+    }
+  }, [notifications, supabase]);
+
+  const dismissNotification = useCallback(async (id: string) => {
+    try {
+      await supabase
+        .from('patient_schedules')
+        .update({ is_active: false })
+        .eq('id', id);
+      
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      setUnreadCount(prev => {
+        const notification = notifications.find(n => n.id === id);
+        return notification && !notification.is_notified ? prev - 1 : prev;
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err : new Error('Failed to dismiss notification');
+      console.error('Failed to dismiss notification:', errorMessage);
+      setError(errorMessage);
+    }
+  }, [notifications, supabase]);
+
+  const updateNotificationSettings = useCallback(async () => {
+    // Placeholder for future notification settings implementation
+    console.log('Notification settings update not yet implemented');
+  }, []);
+
+  const refreshNotifications = useCallback(async () => {
+    await fetchNotifications();
+  }, [fetchNotifications]);
 
   useEffect(() => {
     fetchNotifications();
@@ -101,7 +186,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           
           // Show toast notification for new upcoming schedules
           if (payload.eventType === 'UPDATE' && payload.new) {
-            const schedule = payload.new as any;
+            const schedule = payload.new as PatientScheduleWithRelations;
             if (schedule.next_due_date) {
               const dueDate = new Date(schedule.next_due_date);
               const today = new Date();
@@ -129,13 +214,20 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     };
   }, []);
 
+  const contextValue = useMemo(() => ({
+    unreadCount,
+    notifications,
+    isLoading,
+    error,
+    markAsRead,
+    markAllAsRead,
+    refreshNotifications,
+    dismissNotification,
+    updateNotificationSettings,
+  }), [unreadCount, notifications, isLoading, error, markAsRead, markAllAsRead, refreshNotifications, dismissNotification, updateNotificationSettings]);
+
   return (
-    <NotificationContext.Provider value={{
-      unreadCount,
-      notifications,
-      markAsRead,
-      refreshNotifications,
-    }}>
+    <NotificationContext.Provider value={contextValue}>
       <Toaster 
         position="top-right"
         richColors

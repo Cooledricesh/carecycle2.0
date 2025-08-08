@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { Bell, BellOff, Calendar, Clock, User } from 'lucide-react';
 import { useNotifications } from './notification-provider';
 import { Button } from '@heroui/button';
@@ -12,18 +12,19 @@ import {
 import { Badge } from '@heroui/badge';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import type { Notification, NotificationType } from '@/types/notifications';
 
-export function NotificationBell() {
-  const { unreadCount, notifications, markAsRead } = useNotifications();
+function NotificationBellComponent() {
+  const { unreadCount, notifications, markAsRead, isLoading, error } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = useCallback((notification: Notification) => {
     if (!notification.is_notified) {
       markAsRead(notification.id);
     }
-  };
+  }, [markAsRead]);
 
-  const formatDueDate = (dateString: string) => {
+  const formatDueDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
     const daysUntilDue = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -32,7 +33,19 @@ export function NotificationBell() {
     if (daysUntilDue === 1) return '내일';
     if (daysUntilDue === 2) return '모레';
     return `${daysUntilDue}일 후`;
-  };
+  }, []);
+
+  const getItemTypeLabel = useCallback((type: NotificationType | undefined) => {
+    if (!type) return '알 수 없음';
+    return type === NotificationType.INJECTION ? '주사' : '검사';
+  }, []);
+
+  const sortedNotifications = useMemo(() => {
+    return [...notifications].sort((a, b) => {
+      // Sort by due date (earliest first)
+      return new Date(a.next_due_date).getTime() - new Date(b.next_due_date).getTime();
+    });
+  }, [notifications]);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -63,7 +76,17 @@ export function NotificationBell() {
         </div>
         
         <div className="max-h-[400px] overflow-y-auto">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <p className="text-sm text-destructive">
+                알림을 불러오는 중 오류가 발생했습니다
+              </p>
+            </div>
+          ) : sortedNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <BellOff className="mb-2 h-8 w-8 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
@@ -72,7 +95,7 @@ export function NotificationBell() {
             </div>
           ) : (
             <div className="divide-y">
-              {notifications.map((notification) => (
+              {sortedNotifications.map((notification) => (
                 <button
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
@@ -97,7 +120,7 @@ export function NotificationBell() {
                             {notification.item?.name}
                           </span>
                           <Badge variant="outline" className="text-xs">
-                            {notification.item?.type === 'injection' ? '주사' : '검사'}
+                            {getItemTypeLabel(notification.item?.type as NotificationType | undefined)}
                           </Badge>
                         </div>
                       </div>
@@ -122,7 +145,7 @@ export function NotificationBell() {
           )}
         </div>
         
-        {notifications.length > 0 && (
+        {sortedNotifications.length > 0 && (
           <div className="border-t p-2">
             <Button
               variant="ghost"
@@ -138,3 +161,5 @@ export function NotificationBell() {
     </Popover>
   );
 }
+
+export const NotificationBell = memo(NotificationBellComponent);
