@@ -18,13 +18,12 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -34,7 +33,6 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
     setError("");
 
     try {
@@ -51,8 +49,6 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -66,14 +62,22 @@ export default function LoginPage() {
           </p>
         </div>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+        <form 
+          onSubmit={handleSubmit(onSubmit)} 
+          className="mt-8 space-y-6"
+          noValidate
+          aria-busy={isSubmitting}
+        >
           <div className="space-y-4">
             <Input
               {...register("email")}
               type="email"
               label="Email"
               placeholder="Enter your email"
-              disabled={isLoading}
+              autoComplete="email"
+              autoFocus
+              required
+              disabled={isSubmitting}
               isInvalid={!!errors.email}
               errorMessage={errors.email?.message}
             />
@@ -82,14 +86,20 @@ export default function LoginPage() {
               type="password"
               label="Password"
               placeholder="Enter your password"
-              disabled={isLoading}
+              autoComplete="current-password"
+              required
+              disabled={isSubmitting}
               isInvalid={!!errors.password}
               errorMessage={errors.password?.message}
             />
           </div>
 
           {error && (
-            <div className="text-sm text-red-600 text-center">
+            <div 
+              className="text-sm text-red-600 text-center"
+              role="alert"
+              aria-live="assertive"
+            >
               {error}
             </div>
           )}
@@ -98,10 +108,10 @@ export default function LoginPage() {
             type="submit"
             color="primary"
             className="w-full"
-            isLoading={isLoading}
-            disabled={isLoading}
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
           >
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isSubmitting ? "Signing in..." : "Sign In"}
           </Button>
         </form>
       </div>
