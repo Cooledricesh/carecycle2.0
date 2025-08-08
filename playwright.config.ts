@@ -15,10 +15,17 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
   },
-  webServer: {
-    command: process.env.CI ? 'npm run start -- -p 3000' : 'npm run dev -- -p 3000',
+  webServer: process.env.CI ? {
+    command: 'npm run start',
     port: 3000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
+    timeout: 120_000,
+    stdout: 'pipe',
+    stderr: 'pipe'
+  } : {
+    command: 'npm run dev',
+    port: 3000,
+    reuseExistingServer: true,
     timeout: 120_000
   },
   projects: [
