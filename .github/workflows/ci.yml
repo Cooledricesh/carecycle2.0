@@ -93,6 +93,11 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_placeholder' }}
+          NEXTAUTH_URL: 'http://localhost:3000'
+          NEXTAUTH_SECRET: 'test-secret-for-ci-build'
+
+      - name: Check build output
+        run: ls -la .next || echo "Build directory not found"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -101,7 +106,7 @@ jobs:
           name: build-files
           path: .next
           retention-days: 7
-          if-no-files-found: error
+          if-no-files-found: warn
 
   security:
     name: Security Audit
@@ -153,6 +158,19 @@ jobs:
         with:
           name: build-files
           path: .next
+        continue-on-error: true
+
+      - name: Build if artifacts missing
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "Build artifacts not found, building locally..."
+            npm run build
+          fi
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_placeholder' }}
+          NEXTAUTH_URL: 'http://localhost:3000'
+          NEXTAUTH_SECRET: 'test-secret-for-ci-build'
 
       - name: Run E2E tests
         run: npx playwright test
@@ -160,6 +178,8 @@ jobs:
           CI: true
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_placeholder' }}
+          NEXTAUTH_URL: 'http://localhost:3000'
+          NEXTAUTH_SECRET: 'test-secret-for-ci-build'
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

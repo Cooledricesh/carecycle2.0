@@ -61,7 +61,7 @@ const sentryWebpackPluginOptions = {
   },
 };
 
-// Export with Sentry wrapper only if DSN is configured
-export default process.env.NEXT_PUBLIC_SENTRY_DSN
+// Export with Sentry wrapper only if DSN and AUTH TOKEN are configured
+export default (process.env.NEXT_PUBLIC_SENTRY_DSN && process.env.SENTRY_AUTH_TOKEN)
   ? withSentryConfig(nextConfig, sentryWebpackPluginOptions)
   : nextConfig;

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createPureClient } from '@/lib/supabase/server';
+import { sanitizeErrorMessage } from '@/lib/api-errors';
 
 export async function POST() {
   try {
@@ -22,7 +23,7 @@ export async function POST() {
         .rpc('exec_sql', { sql: checkColumnSql })
         .maybeSingle();
 
-      if (!checkError && columnData && Array.isArray(columnData) && columnData.length > 0) {
+      if (!checkError && columnData) {
         columnExists = true;
       }
     } catch (error) {
@@ -47,7 +48,7 @@ export async function POST() {
         return NextResponse.json(
           { 
             error: 'Failed to check column existence',
-            message: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
+            message: sanitizeErrorMessage(fallbackError)
           },
           { status: 500 }
         );
@@ -83,7 +84,7 @@ export async function POST() {
         return NextResponse.json(
           { 
             error: 'Failed to add actual_completion_date column',
-            message: sqlError.message
+            message: sanitizeErrorMessage(sqlError)
           },
           { status: 500 }
         );
@@ -117,7 +118,7 @@ export async function POST() {
         .rpc('exec_sql', { sql: verifyColumnSql })
         .maybeSingle();
 
-      if (!verifyError && verifyData && Array.isArray(verifyData) && verifyData.length > 0) {
+      if (!verifyError && verifyData) {
         verificationPassed = true;
       }
     } catch (error) {
@@ -157,7 +158,7 @@ export async function POST() {
     return NextResponse.json(
       { 
         error: 'Failed to fix column',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error)
       },
       { status: 500 }
     );
@@ -185,7 +186,7 @@ export async function GET() {
         .rpc('exec_sql', { sql: checkColumnSql })
         .maybeSingle();
 
-      if (!checkError && columnData && Array.isArray(columnData) && columnData.length > 0) {
+      if (!checkError && columnData) {
         columnExists = true;
       }
     } catch (error) {
@@ -210,7 +211,7 @@ export async function GET() {
         return NextResponse.json(
           { 
             error: 'Failed to check column existence',
-            message: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
+            message: sanitizeErrorMessage(fallbackError)
           },
           { status: 500 }
         );
@@ -231,7 +232,7 @@ export async function GET() {
     return NextResponse.json(
       { 
         error: 'Failed to check column',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: sanitizeErrorMessage(error)
       },
       { status: 500 }
     );
