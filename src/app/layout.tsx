@@ -5,6 +5,7 @@ import Providers from './providers';
 import { AuthProvider } from '@/components/auth/auth-provider';
 import { Analytics } from '@/components/analytics';
 import ErrorBoundary from '@/components/error-boundary';
+import Navigation from '@/components/navigation';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,7 +35,10 @@ export default function RootLayout({
         <ErrorBoundary>
           <Providers>
             <AuthProvider>
-              {children}
+              <Navigation />
+              <main>
+                {children}
+              </main>
             </AuthProvider>
           </Providers>
         </ErrorBoundary>

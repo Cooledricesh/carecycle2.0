@@ -37,7 +37,7 @@ export async function GET() {
     }
 
     // Format the response to match the requirements
-    const schedules = (data || []).map(schedule => ({
+    const schedules = (data || []).map((schedule: any) => ({
       scheduleId: schedule.id,
       scheduledDate: schedule.next_due_date,
       patient: {

@@ -43,12 +43,12 @@ export async function GET() {
     }
 
     // Transform recent activity data
-    const recentActivity: RecentActivity[] = recentActivityData?.map(item => ({
+    const recentActivity: RecentActivity[] = recentActivityData?.map((item: any) => ({
       id: item.id,
-      patientName: item.patient_schedules.patients.name,
-      patientNumber: item.patient_schedules.patients.patient_number,
-      itemName: item.patient_schedules.items.name,
-      itemType: item.patient_schedules.items.type as 'test' | 'injection',
+      patientName: item.patient_schedules?.patients?.name || '',
+      patientNumber: item.patient_schedules?.patients?.patient_number || '',
+      itemName: item.patient_schedules?.items?.name || '',
+      itemType: (item.patient_schedules?.items?.type || 'test') as 'test' | 'injection',
       scheduledDate: item.scheduled_date,
       completedDate: item.completed_date,
       actualCompletionDate: item.actual_completion_date,
@@ -82,7 +82,7 @@ export async function GET() {
 
     // Filter out schedules that are already completed
     const upcomingSchedulesWithCompletion = await Promise.all(
-      (upcomingData || []).map(async (schedule) => {
+      (upcomingData || []).map(async (schedule: any) => {
         const { data: historyData } = await supabase
           .from('schedule_history')
           .select('status')
@@ -102,10 +102,10 @@ export async function GET() {
 
         return {
           id: schedule.id,
-          patientName: schedule.patients.name,
-          patientNumber: schedule.patients.patient_number,
-          itemName: schedule.items.name,
-          itemType: schedule.items.type as 'test' | 'injection',
+          patientName: schedule.patients?.name || '',
+          patientNumber: schedule.patients?.patient_number || '',
+          itemName: schedule.items?.name || '',
+          itemType: (schedule.items?.type || 'test') as 'test' | 'injection',
           dueDate: schedule.next_due_date,
           daysDue
         };

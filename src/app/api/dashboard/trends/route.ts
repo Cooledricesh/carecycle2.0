@@ -109,7 +109,7 @@ async function calculateItemTypeDistribution(supabase: any): Promise<ItemTypeDis
       return acc;
     }, {}) || {};
 
-    const totalItems = Object.values(typeCounts).reduce((sum: number, count: number) => sum + count, 0);
+    const totalItems = Object.values(typeCounts).reduce((sum: number, count: any) => sum + (count as number), 0);
 
     // Convert to ItemTypeDistribution format
     const distribution: ItemTypeDistribution[] = ['test', 'injection'].map(type => {
