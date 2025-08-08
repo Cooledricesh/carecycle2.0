@@ -15,10 +15,10 @@ export async function GET() {
     }
 
     const supabase = await createPureClient();
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]!;
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
-    const nextWeekDate = nextWeek.toISOString().split('T')[0];
+    const nextWeekDate = nextWeek.toISOString().split('T')[0]!;
 
     // Get last 10 completed schedules with patient and item details
     const { data: recentActivityData, error: recentError } = await supabase
