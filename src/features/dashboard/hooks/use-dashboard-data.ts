@@ -17,7 +17,30 @@ import type {
 export function useDashboardStats() {
   return useQuery({
     queryKey: dashboardQueryKeys.stats(),
-    queryFn: dashboardClient.getStats,
+    queryFn: async () => {
+      try {
+        const data = await dashboardClient.getStats();
+        
+        // Save successful data for offline use
+        if (typeof window !== 'undefined') {
+          const { DashboardOfflineManager } = await import('../lib/dashboard-offline');
+          // We'll save when we have all three datasets
+        }
+        
+        return data;
+      } catch (error) {
+        // Try to load offline data if request fails
+        if (typeof window !== 'undefined') {
+          const { DashboardOfflineManager } = await import('../lib/dashboard-offline');
+          const offlineData = await DashboardOfflineManager.loadOfflineData();
+          if (offlineData) {
+            console.info('[Dashboard] Using offline stats data');
+            return offlineData.stats;
+          }
+        }
+        throw error;
+      }
+    },
     refetchInterval: 30000, // Refetch every 30 seconds
     staleTime: 20000, // Data is fresh for 20 seconds
     gcTime: 300000, // Keep in cache for 5 minutes

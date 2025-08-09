@@ -21,7 +21,9 @@ import { Chip } from '@heroui/chip';
 import { Divider } from '@heroui/divider';
 import { Skeleton } from '@heroui/skeleton';
 import { motion } from 'framer-motion';
-import { UserPlus, Calendar, Clock, CheckCircle } from 'lucide-react';
+import { UserPlus, Calendar, Clock, CheckCircle, Pill, FileText } from 'lucide-react';
+import { useCareItemsWithDisplay } from '@/hooks/use-care-items';
+import { CareItemWithDisplay } from '@/services/care-items.service';
 
 const formSchema = z.object({
   patientNumber: z.string().min(1, '환자 번호를 입력해주세요'),
@@ -29,23 +31,14 @@ const formSchema = z.object({
   schedules: z.array(z.object({
     itemId: z.string().min(1, '항목을 선택해주세요'),
     firstDate: z.string().min(1, '최초 시행일을 입력해주세요'),
-    periodValue: z.number(),
-    periodUnit: z.string()
+    intervalWeeks: z.number()
   })).min(1, '최소 하나의 관리 항목을 추가해주세요')
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-interface Item {
-  id: string;
-  name: string;
-  type: string;
-  period_value: number;
-  period_unit: string;
-}
-
 export function PatientRegistrationForm() {
-  const [items, setItems] = useState<Item[]>([]);
+  const { data: careItems, isLoading: itemsLoading } = useCareItemsWithDisplay();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -59,29 +52,8 @@ export function PatientRegistrationForm() {
     }
   });
   
-  // Fetch available items on mount
-  useEffect(() => {
-    fetchItems();
-  }, []);
-  
-  const fetchItems = useCallback(async () => {
-    try {
-      const response = await fetch('/api/items');
-      if (!response.ok) throw new Error('Failed to fetch items');
-      const data = await response.json();
-      setItems(data);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-      toast({
-        title: '오류',
-        description: '관리 항목을 불러오는데 실패했습니다',
-        variant: 'destructive'
-      });
-    }
-  }, [toast]);
-  
   const handleItemToggle = (itemId: string, checked: boolean) => {
-    const item = items.find(i => i.id === itemId);
+    const item = careItems?.find(i => i.id === itemId);
     if (!item) return;
     
     if (checked) {
@@ -92,8 +64,7 @@ export function PatientRegistrationForm() {
         {
           itemId: item.id,
           firstDate: '',
-          periodValue: item.period_value,
-          periodUnit: item.period_unit
+          intervalWeeks: item.interval_weeks
         }
       ]);
     } else {
@@ -234,7 +205,7 @@ export function PatientRegistrationForm() {
                   <Divider />
                 </div>
                 
-                {items.length === 0 ? (
+                {itemsLoading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[...Array(4)].map((_, i) => (
                       <Skeleton key={i} className="h-16 w-full rounded-lg" />
@@ -242,7 +213,7 @@ export function PatientRegistrationForm() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {items.map((item) => (
+                    {careItems?.map((item) => (
                       <motion.div
                         key={item.id}
                         whileHover={{ scale: 1.02 }}
@@ -265,14 +236,21 @@ export function PatientRegistrationForm() {
                               }
                               color="primary"
                             />
-                            <div className="flex-1">
-                              <h4 className="font-medium text-slate-800 mb-1">{item.name}</h4>
+                            <div className="flex-1 space-y-2">
+                              <div className="flex items-center gap-2">
+                                {item.type === 'procedure' ? (
+                                  <FileText className="h-4 w-4 text-primary" />
+                                ) : (
+                                  <Pill className="h-4 w-4 text-secondary" />
+                                )}
+                                <h4 className="font-medium text-slate-800">{item.name}</h4>
+                              </div>
                               <Chip 
                                 size="sm" 
-                                color={item.type === 'test' ? 'primary' : 'secondary'}
+                                color={item.type === 'procedure' ? 'primary' : 'secondary'}
                                 variant="flat"
                               >
-                                {item.type === 'test' ? '검사' : '주사'} · {item.period_value}{item.period_unit === 'weeks' ? '주' : '개월'} 주기
+                                {item.type === 'procedure' ? '검사' : '주사'} · {item.interval_display}
                               </Chip>
                             </div>
                           </div>
@@ -305,7 +283,7 @@ export function PatientRegistrationForm() {
                   
                   <div className="space-y-4">
                     {schedules.map((schedule, index) => {
-                      const item = items.find(i => i.id === schedule.itemId);
+                      const item = careItems?.find(i => i.id === schedule.itemId);
                       if (!item) return null;
                       
                       return (
@@ -321,7 +299,7 @@ export function PatientRegistrationForm() {
                             <div>
                               <span className="font-medium text-slate-800">{item.name}</span>
                               <Chip size="sm" color="primary" variant="flat" className="ml-2">
-                                {item.period_value}{item.period_unit === 'weeks' ? '주' : '개월'} 주기
+                                {item.interval_display}
                               </Chip>
                             </div>
                           </div>
