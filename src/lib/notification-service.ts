@@ -8,10 +8,9 @@ import type {
   Notification, 
   NotificationFilter, 
   NotificationSort,
-  NotificationPriority,
-  NotificationStatus,
   EnhancedNotification 
 } from '@/types/notifications';
+import { NotificationPriority, NotificationStatus } from '@/types/notifications';
 import type { PatientScheduleWithRelations } from '@/types/supabase';
 import { NotificationSchema } from '@/types/notifications';
 
@@ -43,16 +42,20 @@ export class NotificationService {
           patient_id,
           item_id,
           next_due_date,
+          first_date,
+          last_completed_date,
           is_notified,
           is_active,
           created_at,
           updated_at,
-          patient:patients!patient_id (
+          patients!patient_schedules_patient_id_fkey (
             id,
             name,
-            patient_number
+            patient_number,
+            created_at,
+            updated_at
           ),
-          item:items!item_id (
+          items!patient_schedules_item_id_fkey (
             id,
             name,
             type,
@@ -174,7 +177,7 @@ export class NotificationService {
    * Transform patient schedules to notifications
    */
   private transformSchedulesToNotifications(
-    schedules: PatientScheduleWithRelations[]
+    schedules: any[]
   ): Notification[] {
     return schedules
       .map(schedule => {
@@ -188,18 +191,18 @@ export class NotificationService {
             is_active: schedule.is_active ?? true,
             created_at: schedule.created_at,
             updated_at: schedule.updated_at,
-            patient: schedule.patient ? {
-              id: schedule.patient.id,
-              name: schedule.patient.name,
-              patient_number: schedule.patient.patient_number,
-            } : undefined,
-            item: schedule.item ? {
-              id: schedule.item.id,
-              name: schedule.item.name,
-              type: schedule.item.type as 'test' | 'injection',
-              period_value: schedule.item.period_value,
-              period_unit: schedule.item.period_unit as 'weeks' | 'months',
-            } : undefined,
+            patient: schedule.patients ? {
+              id: schedule.patients.id,
+              name: schedule.patients.name,
+              patient_number: schedule.patients.patient_number,
+            } as any : undefined,
+            item: schedule.items ? {
+              id: schedule.items.id,
+              name: schedule.items.name,
+              type: schedule.items.type as 'test' | 'injection',
+              period_value: schedule.items.period_value,
+              period_unit: schedule.items.period_unit as 'weeks' | 'months',
+            } as any : undefined,
           };
 
           // Validate with Zod schema
@@ -297,8 +300,8 @@ export class NotificationService {
         async (payload) => {
           try {
             if (payload.new) {
-              const transformed = this.transformSchedulesToNotifications([payload.new as PatientScheduleWithRelations]);
-              if (transformed.length > 0) {
+              const transformed = this.transformSchedulesToNotifications([payload.new as any]);
+              if (transformed.length > 0 && transformed[0]) {
                 onUpdate(transformed[0]);
               }
             }

@@ -12,6 +12,11 @@ import {
   mockEnvironmentVariables,
 } from '@/lib/test-utils';
 
+// Helper function to create RPC mock with maybeSingle method
+const createRpcMock = (data: any, error: any = null) => ({
+  maybeSingle: jest.fn().mockResolvedValue({ data, error })
+});
+
 // Mock dependencies
 const mockSupabaseClient = {
   from: jest.fn(),
@@ -48,8 +53,8 @@ describe('/api/dashboard/fix-column', () => {
     describe('Column existence check', () => {
       it('should return column exists when RPC check succeeds', async () => {
         // Mock successful RPC call that finds the column
-        mockSupabaseClient.rpc.mockResolvedValue(
-          createMockRpcResponse({ column_name: 'actual_completion_date' }, null)
+        mockSupabaseClient.rpc.mockReturnValue(
+          createRpcMock({ column_name: 'actual_completion_date' })
         );
 
         const response = await GET();
@@ -73,8 +78,8 @@ describe('/api/dashboard/fix-column', () => {
 
       it('should return column does not exist when RPC returns null', async () => {
         // Mock RPC call that doesn't find the column
-        mockSupabaseClient.rpc.mockResolvedValue(
-          createMockRpcResponse(null, null)
+        mockSupabaseClient.rpc.mockReturnValue(
+          createRpcMock(null)
         );
 
         const response = await GET();
@@ -91,9 +96,8 @@ describe('/api/dashboard/fix-column', () => {
 
       it('should fallback to direct select when RPC fails', async () => {
         // Mock RPC failure, then successful select
-        mockSupabaseClient.rpc.mockImplementationOnce(() => 
-          Promise.reject(new Error('RPC not available'))
-        );
+        const rpcError = { message: 'RPC not available' };
+        mockSupabaseClient.rpc.mockRejectedValueOnce(rpcError);
         
         const mockSelectQuery = {
           select: jest.fn().mockReturnValue({
@@ -114,9 +118,8 @@ describe('/api/dashboard/fix-column', () => {
 
       it('should detect column does not exist via select error', async () => {
         // Mock RPC failure, then select with column not exist error
-        mockSupabaseClient.rpc.mockImplementationOnce(() => 
-          Promise.reject(new Error('RPC not available'))
-        );
+        const rpcError = { message: 'RPC not available' };
+        mockSupabaseClient.rpc.mockRejectedValueOnce(rpcError);
         
         const mockSelectQuery = {
           select: jest.fn().mockReturnValue({
@@ -137,9 +140,8 @@ describe('/api/dashboard/fix-column', () => {
 
       it('should handle fallback select error', async () => {
         // Mock both RPC and fallback select failure
-        mockSupabaseClient.rpc.mockImplementationOnce(() => 
-          Promise.reject(new Error('RPC not available'))
-        );
+        const rpcError = { message: 'RPC not available' };
+        mockSupabaseClient.rpc.mockRejectedValueOnce(rpcError);
         
         const mockSelectQuery = {
           select: jest.fn().mockReturnValue({
@@ -170,7 +172,8 @@ describe('/api/dashboard/fix-column', () => {
 
     describe('Error handling', () => {
       it('should handle Supabase client creation error', async () => {
-        mockCreatePureClient.mockRejectedValueOnce(new Error('Supabase unavailable'));
+        const clientError = { message: 'Supabase unavailable' };
+        mockCreatePureClient.mockRejectedValueOnce(clientError);
         mockSanitizeErrorMessage.mockReturnValue('Service unavailable');
 
         const response = await GET();
@@ -210,8 +213,8 @@ describe('/api/dashboard/fix-column', () => {
     describe('Column creation', () => {
       it('should return success when column already exists', async () => {
         // Mock RPC call that finds existing column
-        mockSupabaseClient.rpc.mockResolvedValue(
-          createMockRpcResponse({ column_name: 'actual_completion_date' }, null)
+        mockSupabaseClient.rpc.mockReturnValue(
+          createRpcMock({ column_name: 'actual_completion_date' })
         );
 
         const response = await POST();
@@ -228,9 +231,9 @@ describe('/api/dashboard/fix-column', () => {
       it('should create column when it does not exist', async () => {
         // Mock RPC calls: first check (not found), alter table (success), verify (found)
         mockSupabaseClient.rpc
-          .mockResolvedValueOnce(createMockRpcResponse(null, null)) // Initial check - not found
-          .mockResolvedValueOnce(createMockRpcResponse({}, null)) // ALTER TABLE - success
-          .mockResolvedValueOnce(createMockRpcResponse({ column_name: 'actual_completion_date' }, null)); // Verification - found
+          .mockReturnValueOnce(createRpcMock(null)) // Initial check - not found
+          .mockReturnValueOnce(createRpcMock({})) // ALTER TABLE - success
+          .mockReturnValueOnce(createRpcMock({ column_name: 'actual_completion_date' })); // Verification - found
 
         const response = await POST();
         const responseData = await response.json();
@@ -254,7 +257,7 @@ describe('/api/dashboard/fix-column', () => {
         // Mock RPC failure for initial check, successful select, successful ALTER, successful verify
         mockSupabaseClient.rpc
           .mockRejectedValueOnce(new Error('RPC not available')) // Initial check fails
-          .mockResolvedValueOnce(createMockRpcResponse({}, null)) // ALTER TABLE - success
+          .mockReturnValueOnce(createRpcMock({})) // ALTER TABLE - success
           .mockRejectedValueOnce(new Error('RPC not available')); // Verification RPC fails
 
         const mockSelectQuery = {
@@ -284,8 +287,8 @@ describe('/api/dashboard/fix-column', () => {
       it('should handle ALTER TABLE SQL execution error', async () => {
         // Mock: column not found, ALTER TABLE fails
         mockSupabaseClient.rpc
-          .mockResolvedValueOnce(createMockRpcResponse(null, null)) // Column check - not found
-          .mockResolvedValueOnce(createMockRpcResponse(null, createMockDatabaseError('Permission denied'))); // ALTER fails
+          .mockReturnValueOnce(createRpcMock(null)) // Column check - not found
+          .mockReturnValueOnce(createRpcMock(null, createMockDatabaseError('Permission denied'))); // ALTER fails
 
         mockSanitizeErrorMessage.mockReturnValue('Database permission error');
 
@@ -307,7 +310,7 @@ describe('/api/dashboard/fix-column', () => {
       it('should handle RPC not available error', async () => {
         // Mock: column not found, RPC fails for ALTER
         mockSupabaseClient.rpc
-          .mockResolvedValueOnce(createMockRpcResponse(null, null)) // Column check - not found
+          .mockReturnValueOnce(createRpcMock(null)) // Column check - not found
           .mockRejectedValueOnce(new Error('RPC not available')); // ALTER RPC fails
 
         const response = await POST();
@@ -329,9 +332,9 @@ describe('/api/dashboard/fix-column', () => {
       it('should handle verification failure after ALTER', async () => {
         // Mock: column not found, ALTER success, verification fails
         mockSupabaseClient.rpc
-          .mockResolvedValueOnce(createMockRpcResponse(null, null)) // Initial check - not found
-          .mockResolvedValueOnce(createMockRpcResponse({}, null)) // ALTER TABLE - success
-          .mockResolvedValueOnce(createMockRpcResponse(null, null)); // Verification - still not found
+          .mockReturnValueOnce(createRpcMock(null)) // Initial check - not found
+          .mockReturnValueOnce(createRpcMock({})) // ALTER TABLE - success
+          .mockReturnValueOnce(createRpcMock(null)); // Verification - still not found
 
         const mockSelectQuery = {
           select: jest.fn().mockReturnValue({
@@ -420,9 +423,9 @@ describe('/api/dashboard/fix-column', () => {
       it('should handle mixed RPC availability during operation', async () => {
         // Mock: RPC works for check, fails for ALTER, works for verify
         mockSupabaseClient.rpc
-          .mockResolvedValueOnce(createMockRpcResponse(null, null)) // Check - not found (RPC works)
+          .mockReturnValueOnce(createRpcMock(null)) // Check - not found (RPC works)
           .mockRejectedValueOnce(new Error('RPC temporarily unavailable')) // ALTER fails
-          .mockResolvedValueOnce(createMockRpcResponse({ column_name: 'actual_completion_date' }, null)); // Verify works
+          .mockReturnValueOnce(createRpcMock({ column_name: 'actual_completion_date' })); // Verify works
 
         const response = await POST();
         const responseData = await response.json();
@@ -434,8 +437,8 @@ describe('/api/dashboard/fix-column', () => {
       it('should handle partial verification success', async () => {
         // Mock: successful operation but verification RPC fails, fallback select succeeds
         mockSupabaseClient.rpc
-          .mockResolvedValueOnce(createMockRpcResponse(null, null)) // Check - not found
-          .mockResolvedValueOnce(createMockRpcResponse({}, null)) // ALTER - success
+          .mockReturnValueOnce(createRpcMock(null)) // Check - not found
+          .mockReturnValueOnce(createRpcMock({})) // ALTER - success
           .mockRejectedValueOnce(new Error('Verification RPC failed')); // Verify RPC fails
 
         const mockSelectQuery = {
@@ -458,8 +461,8 @@ describe('/api/dashboard/fix-column', () => {
 
       it('should handle database schema permissions error', async () => {
         mockSupabaseClient.rpc
-          .mockResolvedValueOnce(createMockRpcResponse(null, null)) // Check - not found
-          .mockResolvedValueOnce(createMockRpcResponse(null, createMockDatabaseError('insufficient_privilege')));
+          .mockReturnValueOnce(createRpcMock(null)) // Check - not found
+          .mockReturnValueOnce(createRpcMock(null, createMockDatabaseError('insufficient_privilege')));
 
         mockSanitizeErrorMessage.mockReturnValue('Permission denied');
 
@@ -477,8 +480,8 @@ describe('/api/dashboard/fix-column', () => {
 
   describe('SQL injection protection', () => {
     it('should use parameterized queries for RPC calls', async () => {
-      mockSupabaseClient.rpc.mockResolvedValue(
-        createMockRpcResponse({ column_name: 'actual_completion_date' }, null)
+      mockSupabaseClient.rpc.mockReturnValue(
+        createRpcMock({ column_name: 'actual_completion_date' })
       );
 
       await GET();
@@ -493,9 +496,9 @@ describe('/api/dashboard/fix-column', () => {
 
     it('should use safe SQL for ALTER TABLE operations', async () => {
       mockSupabaseClient.rpc
-        .mockResolvedValueOnce(createMockRpcResponse(null, null))
-        .mockResolvedValueOnce(createMockRpcResponse({}, null))
-        .mockResolvedValueOnce(createMockRpcResponse({ column_name: 'actual_completion_date' }, null));
+        .mockReturnValueOnce(createRpcMock(null))
+        .mockReturnValueOnce(createRpcMock({}))
+        .mockReturnValueOnce(createRpcMock({ column_name: 'actual_completion_date' }));
 
       await POST();
 
@@ -511,8 +514,8 @@ describe('/api/dashboard/fix-column', () => {
 
   describe('Response consistency', () => {
     it('should return consistent response format for GET success', async () => {
-      mockSupabaseClient.rpc.mockResolvedValue(
-        createMockRpcResponse({ column_name: 'actual_completion_date' }, null)
+      mockSupabaseClient.rpc.mockReturnValue(
+        createRpcMock({ column_name: 'actual_completion_date' })
       );
 
       const response = await GET();
@@ -526,8 +529,8 @@ describe('/api/dashboard/fix-column', () => {
     });
 
     it('should return consistent response format for POST success', async () => {
-      mockSupabaseClient.rpc.mockResolvedValue(
-        createMockRpcResponse({ column_name: 'actual_completion_date' }, null)
+      mockSupabaseClient.rpc.mockReturnValue(
+        createRpcMock({ column_name: 'actual_completion_date' })
       );
 
       const response = await POST();

@@ -211,34 +211,51 @@ export const createMockSupabaseClient = () => {
   // Create chainable query builder
   const createQueryBuilder = () => {
     const builder: any = {
-      select: jest.fn().mockImplementation((columns, options) => {
-        // Handle count queries
-        if (options?.count === 'exact') {
-          return Promise.resolve({ count: 0, error: null });
-        }
-        return builder;
-      }),
-      insert: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      delete: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      neq: jest.fn().mockReturnThis(),
-      gt: jest.fn().mockReturnThis(),
-      gte: jest.fn().mockReturnThis(),
-      lt: jest.fn().mockReturnThis(),
-      lte: jest.fn().mockReturnThis(),
-      in: jest.fn().mockReturnThis(),
-      contains: jest.fn().mockReturnThis(),
-      containedBy: jest.fn().mockReturnThis(),
-      range: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({ data: null, error: null }),
-      maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
-      limit: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
+      select: jest.fn(),
+      insert: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      eq: jest.fn(),
+      neq: jest.fn(),
+      gt: jest.fn(),
+      gte: jest.fn(),
+      lt: jest.fn(),
+      lte: jest.fn(),
+      in: jest.fn(),
+      contains: jest.fn(),
+      containedBy: jest.fn(),
+      range: jest.fn(),
+      single: jest.fn(),
+      maybeSingle: jest.fn(),
+      limit: jest.fn(),
+      order: jest.fn(),
     };
     
-    // Make select chainable
-    builder.select.mockReturnValue(builder);
+    // Make all methods chainable
+    Object.keys(builder).forEach(key => {
+      if (key === 'single' || key === 'maybeSingle') {
+        builder[key].mockResolvedValue({ data: null, error: null });
+      } else if (key === 'select') {
+        builder[key].mockImplementation((columns: any, options: any) => {
+          // Handle count queries
+          if (options?.count === 'exact') {
+            // Return a promise-like object for count queries
+            return {
+              then: (resolve: any) => resolve({ count: 0, error: null }),
+              eq: () => Promise.resolve({ count: 0, error: null }),
+              neq: () => Promise.resolve({ count: 0, error: null }),
+              gt: () => Promise.resolve({ count: 0, error: null }),
+              gte: () => Promise.resolve({ count: 0, error: null }),
+              lt: () => Promise.resolve({ count: 0, error: null }),
+              lte: () => Promise.resolve({ count: 0, error: null }),
+            };
+          }
+          return builder;
+        });
+      } else {
+        builder[key].mockReturnValue(builder);
+      }
+    });
     
     return builder;
   };

@@ -27,7 +27,7 @@ export class DashboardService {
    */
   async getStats(): Promise<DashboardStatsResponse> {
     const { supabase } = this.deps;
-    const today = new Date().toISOString().split('T')[0];
+    const today: string = new Date().toISOString().split('T')[0];
     
     // Get total patients count
     const { count: totalPatients, error: patientsError } = await supabase
