@@ -1,112 +1,87 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { calculateNextDueDate } from '@/lib/schedule-utils';
+import { createPatientService } from '@/services/patient.service';
+import { PatientRegistrationRequestSchema } from '@/features/patient/types';
+import { handleApiError } from '@/lib/error-handler';
+import * as Sentry from '@sentry/nextjs';
 
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { patientNumber, name, schedules } = body;
-    
-    // Validate input
-    if (!patientNumber || !name || !schedules || !Array.isArray(schedules)) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-    
-    // Create Supabase client
-    const supabase = await createClient();
-    
-    // Prepare schedules with calculated next due dates
-    const preparedSchedules = schedules.map(schedule => ({
-      item_id: schedule.itemId,
-      first_date: schedule.firstDate,
-      next_due_date: calculateNextDueDate(
-        schedule.firstDate,
-        {
-          value: schedule.periodValue,
-          unit: schedule.periodUnit
+  return Sentry.startSpan(
+    {
+      op: 'http.server',
+      name: 'POST /api/patients',
+    },
+    async (span) => {
+      try {
+        const supabase = await createClient();
+        const patientService = createPatientService(supabase);
+        
+        const body = await request.json();
+        span.setAttribute('endpoint', '/api/patients');
+        
+        // Validate request data
+        const validationResult = PatientRegistrationRequestSchema.safeParse(body);
+        if (!validationResult.success) {
+          return NextResponse.json(
+            { 
+              error: 'Invalid request data', 
+              details: validationResult.error.issues 
+            },
+            { status: 400 }
+          );
         }
-      ).toISOString().split('T')[0]
-    }));
-    
-    // Call RPC function to register patient with schedules
-    const { data, error } = await supabase.rpc('register_patient_with_schedules', {
-      p_patient_number: patientNumber,
-      p_name: name,
-      p_schedules: preparedSchedules
-    });
-    
-    if (error) {
-      console.error('Error registering patient:', error);
-      
-      // Handle specific errors
-      if (error.message.includes('already exists')) {
-        return NextResponse.json(
-          { error: 'Patient with this number already exists' },
-          { status: 409 }
-        );
+        
+        const patientData = validationResult.data;
+        span.setAttribute('patient.name', patientData.name);
+        span.setAttribute('patient.scheduleCount', patientData.schedules.length);
+        
+        const patient = await patientService.registerPatient(patientData);
+        
+        return NextResponse.json({ 
+          success: true,
+          patient,
+          message: 'Patient registered successfully'
+        }, { status: 201 });
+      } catch (error) {
+        console.error('Error registering patient:', error);
+        Sentry.captureException(error);
+        
+        return handleApiError(error, {
+          defaultMessage: 'Failed to register patient',
+          context: 'patient.registerPatient'
+        });
       }
-      
-      if (error.message.includes('Invalid item_id')) {
-        return NextResponse.json(
-          { error: 'Invalid item selected' },
-          { status: 400 }
-        );
-      }
-      
-      return NextResponse.json(
-        { error: 'Failed to register patient' },
-        { status: 500 }
-      );
     }
-    
-    return NextResponse.json(data, { status: 201 });
-  } catch (error) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  );
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    const supabase = await createClient();
-    
-    // Get all patients with their schedules
-    const { data, error } = await supabase
-      .from('patients')
-      .select(`
-        *,
-        patient_schedules (
-          *,
-          items (
-            name,
-            type,
-            period_value,
-            period_unit
-          )
-        )
-      `)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Error fetching patients:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch patients' },
-        { status: 500 }
-      );
+  return Sentry.startSpan(
+    {
+      op: 'http.server',
+      name: 'GET /api/patients',
+    },
+    async (span) => {
+      try {
+        const supabase = await createClient();
+        const patientService = createPatientService(supabase);
+        
+        span.setAttribute('endpoint', '/api/patients');
+        
+        const patients = await patientService.getAllPatients();
+        
+        span.setAttribute('patients.count', patients.length);
+        
+        return NextResponse.json(patients);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        Sentry.captureException(error);
+        
+        return handleApiError(error, {
+          defaultMessage: 'Failed to fetch patients',
+          context: 'patient.getAllPatients'
+        });
+      }
     }
-    
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  );
 }
