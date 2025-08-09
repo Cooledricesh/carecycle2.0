@@ -27,14 +27,10 @@ test.describe('Notification Journey E2E Tests', () => {
     homePage = new HomePage(page);
     loginPage = new LoginPage(page);
 
-    // Ensure user is authenticated
+    // User should already be authenticated via global setup and storageState
+    // Just verify we can navigate to the home page
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    
-    if (page.url().includes('/login')) {
-      await loginPage.loginWithValidCredentials();
-      await loginPage.verifyLoginSuccess();
-    }
   });
 
   test('notification bell display and basic functionality', async ({ page }) => {
@@ -51,16 +47,14 @@ test.describe('Notification Journey E2E Tests', () => {
     
     // Wait for popover/dropdown to appear
     const popover = page.locator('[role="dialog"], .popover, [data-state="open"], .notification-popover');
-    const popoverVisible = await popover.first().isVisible({ timeout: 5000 }).catch(() => false);
     
-    if (popoverVisible) {
-      await expect(popover.first()).toBeVisible();
-      await homePage.takeScreenshot('notification-popover-opened');
-      
-      // Close popover by clicking outside
-      await page.click('body', { position: { x: 10, y: 10 } });
-      await homePage.takeScreenshot('notification-popover-closed');
-    }
+    // Use proper Playwright assertion with timeout
+    await expect(popover.first()).toBeVisible({ timeout: 5000 });
+    await homePage.takeScreenshot('notification-popover-opened');
+    
+    // Close popover by clicking outside
+    await page.click('body', { position: { x: 10, y: 10 } });
+    await homePage.takeScreenshot('notification-popover-closed');
   });
 
   test('notification creation and display with test data', async ({ page }) => {
@@ -136,8 +130,8 @@ test.describe('Notification Journey E2E Tests', () => {
     const popover = page.locator('[role="dialog"], .popover, [data-state="open"]');
     await expect(popover.first()).toBeVisible({ timeout: 5000 });
     
-    // Count notification items
-    const notificationItems = page.locator('.notification-item, [class*="notification"], li').filter({
+    // Count notification items using specific data-testid
+    const notificationItems = page.locator('[data-testid="notification-item"]').filter({
       has: page.locator('text=/환자|Patient/')
     });
     
@@ -172,7 +166,7 @@ test.describe('Notification Journey E2E Tests', () => {
     await homePage.takeScreenshot('notification-before-interaction');
     
     // Click on first notification item
-    const notificationItems = page.locator('button[class*="hover"], .notification-item, [role="button"]').filter({
+    const notificationItems = page.locator('[data-testid="notification-item"], button[class*="hover"], [role="button"]').filter({
       hasText: /환자|Patient|검사|주사/
     });
     
@@ -180,16 +174,19 @@ test.describe('Notification Journey E2E Tests', () => {
     if (itemCount > 0) {
       const firstItem = notificationItems.first();
       await firstItem.click();
-      await page.waitForTimeout(1000);
       
       await homePage.takeScreenshot('notification-item-clicked');
       
       // Close and reopen to check updated state
       await page.click('body', { position: { x: 10, y: 10 } });
-      await page.waitForTimeout(500);
+      
+      // Wait for the popover to close
+      await expect(popover.first()).toBeHidden({ timeout: 2000 });
       
       await notificationBell.click();
-      await page.waitForTimeout(500);
+      
+      // Wait for the popover to reopen
+      await expect(popover.first()).toBeVisible({ timeout: 2000 });
       await homePage.takeScreenshot('notification-after-interaction');
       
       // Check if count decreased
@@ -304,7 +301,8 @@ test.describe('Notification Journey E2E Tests', () => {
         // Test email input if present
         const emailInput = page.locator('input[type="email"]');
         if (await emailInput.isVisible()) {
-          await emailInput.clear();
+          // Use fill('') instead of clear() since Playwright Locator doesn't have clear()
+          await emailInput.fill('');
           await emailInput.fill('updated@test.com');
           await homePage.takeScreenshot('notification-email-updated');
         }

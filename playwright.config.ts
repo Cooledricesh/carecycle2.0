@@ -5,6 +5,9 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 10_000 },
   retries: process.env.CI ? 2 : 0,
+  // Global setup and teardown for authentication
+  globalSetup: './tests/global-setup.ts',
+  globalTeardown: './tests/global-teardown.ts',
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['github']
@@ -31,7 +34,27 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] }
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Use the global auth storage state by default
+        storageState: './tests/storage/auth.json'
+      }
+    },
+    {
+      name: 'chromium-no-auth',
+      use: { 
+        ...devices['Desktop Chrome'],
+        // No storage state - for testing login flows
+        storageState: undefined
+      }
+    },
+    {
+      name: 'mobile-chrome',
+      use: { 
+        ...devices['Pixel 5'],
+        // Use the global auth storage state
+        storageState: './tests/storage/auth.json'
+      }
     }
   ]
 });

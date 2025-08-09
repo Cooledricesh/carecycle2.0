@@ -3,6 +3,7 @@ import { DashboardPage } from '../pages/dashboard-page';
 import { HomePage } from '../pages/home-page';
 import { LoginPage } from '../pages/login-page';
 import { PatientRegistrationPage } from '../pages/patient-registration-page';
+import { AuthHelpers } from '../utils/auth-helpers';
 
 test.describe('Dashboard Journey E2E Tests', () => {
   let dashboardPage: DashboardPage;
@@ -16,13 +17,21 @@ test.describe('Dashboard Journey E2E Tests', () => {
     loginPage = new LoginPage(page);
     patientRegistrationPage = new PatientRegistrationPage(page);
 
-    // Ensure user is authenticated
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    
-    if (page.url().includes('/login')) {
-      await loginPage.loginWithValidCredentials();
-      await loginPage.verifyLoginSuccess();
+    // Authentication is now handled globally via storage state
+    // Verify authentication is working and handle edge cases
+    try {
+      await page.goto('/', { waitUntil: 'networkidle', timeout: 15000 });
+      
+      // Quick authentication check - if storage state fails, fall back to manual auth
+      const isAuth = await AuthHelpers.isAuthenticated(page);
+      if (!isAuth) {
+        console.log('⚠️ Storage state authentication failed, performing manual login...');
+        await AuthHelpers.performLogin(page);
+      }
+    } catch (error) {
+      console.log('⚠️ BeforeEach authentication check failed:', error);
+      // Try manual authentication as fallback
+      await AuthHelpers.ensureAuthentication(page);
     }
   });
 
@@ -69,7 +78,23 @@ test.describe('Dashboard Journey E2E Tests', () => {
       if (clickableCount > 0) {
         const firstClickable = clickableElements.first();
         await firstClickable.click();
-        await page.waitForTimeout(1000);
+        
+        // Wait for any potential navigation, modal, or content change
+        try {
+          // Wait for potential navigation
+          await page.waitForLoadState('networkidle', { timeout: 3000 });
+        } catch {
+          // If no navigation occurs, wait for any dynamic content to load
+          await page.waitForFunction(
+            () => {
+              // Check if any loading indicators are present
+              const loadingElements = document.querySelectorAll('[aria-busy="true"], [class*="loading"], [class*="skeleton"]');
+              return loadingElements.length === 0;
+            },
+            { timeout: 3000 }
+          ).catch(() => {});
+        }
+        
         await dashboardPage.takeScreenshot(`stats-card-${i}-clicked`);
       }
     }
@@ -92,10 +117,13 @@ test.describe('Dashboard Journey E2E Tests', () => {
 
       // Check for chart tooltips or interactive elements
       const chartTooltips = page.locator('[role="tooltip"], .tooltip, [class*="tooltip"]');
-      const tooltipVisible = await chartTooltips.first().isVisible({ timeout: 2000 }).catch(() => false);
       
-      if (tooltipVisible) {
+      try {
+        await expect(chartTooltips.first()).toBeVisible({ timeout: 2000 });
         await dashboardPage.takeScreenshot('chart-tooltip-shown');
+      } catch {
+        // Tooltip not visible - this is acceptable for charts without interactive tooltips
+        console.log('Chart tooltips not found or not interactive');
       }
     }
   });
@@ -121,7 +149,9 @@ test.describe('Dashboard Journey E2E Tests', () => {
       const button = viewAllButtons.nth(i);
       if (await button.isVisible()) {
         await button.click();
-        await page.waitForTimeout(2000);
+        
+        // Wait for navigation or content change
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
         await dashboardPage.takeScreenshot(`view-all-${i}-clicked`);
         
         // Navigate back to dashboard
@@ -156,7 +186,9 @@ test.describe('Dashboard Journey E2E Tests', () => {
     // Test "View Schedule" quick action
     if (await dashboardPage.viewScheduleButton.isVisible()) {
       await dashboardPage.clickViewSchedule();
-      await page.waitForTimeout(2000);
+      
+      // Wait for navigation or view change
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
       await dashboardPage.takeScreenshot('view-schedule-navigation');
       
       // Navigate back to dashboard
@@ -247,12 +279,26 @@ test.describe('Dashboard Journey E2E Tests', () => {
     // Simulate network interruption
     await page.context().setOffline(true);
     await dashboardPage.refreshData();
-    await page.waitForTimeout(3000);
     
-    // Check for error handling
-    const hasNetworkError = await dashboardPage.errorMessages.first().isVisible({ timeout: 5000 }).catch(() => false);
-    if (hasNetworkError) {
+    // Wait for error state to potentially appear
+    await page.waitForFunction(
+      () => {
+        const errorElements = document.querySelectorAll('[role="alert"], [class*="error"]');
+        return errorElements.length > 0 || 
+               document.querySelectorAll('[class*="loading"], [aria-busy="true"]').length === 0;
+      },
+      { timeout: 5000 }
+    ).catch(() => {});
+    
+    // Check for error handling - expect error messages to appear during network interruption
+    try {
+      await expect(dashboardPage.errorMessages.first()).toBeVisible({ timeout: 5000 });
       await dashboardPage.takeScreenshot('network-error-state');
+    } catch (error) {
+      // If no error message appears, this might indicate poor error handling
+      console.warn('No error message displayed during network interruption. This may indicate missing error handling.');
+      await dashboardPage.takeScreenshot('network-error-no-message');
+      // Continue test without failing, but log the concern
     }
 
     // Restore network and verify recovery
@@ -306,14 +352,16 @@ test.describe('Dashboard Journey E2E Tests', () => {
     expect(loadDuration).toBeLessThan(30000); // Should load within 30 seconds
 
     // Test loading states
-    const hasLoadingStates = await dashboardPage.loadingSkeletons.first().isVisible({ timeout: 1000 }).catch(() => false);
-    
-    if (hasLoadingStates) {
+    try {
+      await expect(dashboardPage.loadingSkeletons.first()).toBeVisible({ timeout: 1000 });
       await dashboardPage.takeScreenshot('loading-states-visible');
       
       // Wait for loading to complete
       await expect(dashboardPage.loadingSkeletons.first()).toBeHidden({ timeout: 15000 });
       await dashboardPage.takeScreenshot('loading-states-hidden');
+    } catch {
+      // Loading states may not be present - this is acceptable
+      console.log('Loading skeleton states not found or already completed');
     }
   });
 
@@ -331,19 +379,32 @@ test.describe('Dashboard Journey E2E Tests', () => {
     if (await searchInput.first().isVisible()) {
       await searchInput.first().fill('test');
       await page.keyboard.press('Enter');
-      await page.waitForTimeout(2000);
+      
+      // Wait for search results to load
+      await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
       await dashboardPage.takeScreenshot('search-applied');
       
       // Clear search
       await searchInput.first().clear();
       await page.keyboard.press('Enter');
-      await page.waitForTimeout(2000);
+      
+      // Wait for search to clear
+      await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
     }
 
     // Test filter functionality if available
     if (await filterButtons.first().isVisible()) {
       await filterButtons.first().click();
-      await page.waitForTimeout(1000);
+      
+      // Wait for filter UI to appear
+      await page.waitForFunction(
+        () => {
+          const filterElements = document.querySelectorAll('[class*="filter"], [role="menu"], [class*="dropdown"]');
+          return filterElements.length > 0;
+        },
+        { timeout: 3000 }
+      ).catch(() => {});
+      
       await dashboardPage.takeScreenshot('filter-opened');
     }
 
@@ -357,7 +418,9 @@ test.describe('Dashboard Journey E2E Tests', () => {
       const secondInput = dateRangeInputs.nth(1);
       await firstInput.fill(lastWeek.toISOString().split('T')[0]);
       await secondInput.fill(today.toISOString().split('T')[0]);
-      await page.waitForTimeout(2000);
+      
+      // Wait for date filter to be applied
+      await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
       await dashboardPage.takeScreenshot('date-filter-applied');
     }
   });
