@@ -83,17 +83,23 @@ describe('/api/dashboard/recent', () => {
           {
             id: 'activity-1',
             patientName: 'John Doe',
+            patientNumber: 'P001',
             itemName: 'Blood Pressure Check',
-            action: 'completed',
-            timestamp: '2024-12-20T10:30:00Z',
+            itemType: 'test' as 'test' | 'injection',
+            scheduledDate: '2024-12-20T10:30:00Z',
+            completedDate: '2024-12-20T10:30:00Z',
+            actualCompletionDate: '2024-12-20T10:30:00Z',
             status: 'completed'
           },
           {
             id: 'activity-2',
             patientName: 'Jane Smith',
+            patientNumber: 'P002',
             itemName: 'Medication Review',
-            action: 'scheduled',
-            timestamp: '2024-12-20T09:15:00Z',
+            itemType: 'injection' as 'test' | 'injection',
+            scheduledDate: '2024-12-20T09:15:00Z',
+            completedDate: null,
+            actualCompletionDate: null,
             status: 'pending'
           }
         ],
@@ -101,9 +107,11 @@ describe('/api/dashboard/recent', () => {
           {
             id: 'schedule-1',
             patientName: 'Bob Wilson',
+            patientNumber: 'P003',
             itemName: 'Follow-up Visit',
+            itemType: 'test' as 'test' | 'injection',
             dueDate: '2024-12-21',
-            priority: 'high'
+            daysDue: 1
           }
         ]
       };
@@ -141,17 +149,22 @@ describe('/api/dashboard/recent', () => {
         recentActivity: Array.from({ length: 50 }, (_, i) => ({
           id: `activity-${i}`,
           patientName: `Patient ${i}`,
+          patientNumber: `P${String(i).padStart(3, '0')}`,
           itemName: `Item ${i}`,
-          action: 'completed',
-          timestamp: `2024-12-20T${String(10 + i % 14).padStart(2, '0')}:00:00Z`,
+          itemType: (i % 2 === 0 ? 'test' : 'injection') as 'test' | 'injection',
+          scheduledDate: `2024-12-20T${String(10 + i % 14).padStart(2, '0')}:00:00Z`,
+          completedDate: `2024-12-20T${String(10 + i % 14).padStart(2, '0')}:00:00Z`,
+          actualCompletionDate: `2024-12-20T${String(10 + i % 14).padStart(2, '0')}:00:00Z`,
           status: 'completed'
         })),
         upcomingSchedules: Array.from({ length: 25 }, (_, i) => ({
           id: `schedule-${i}`,
           patientName: `Patient ${i}`,
+          patientNumber: `P${String(i).padStart(3, '0')}`,
           itemName: `Item ${i}`,
+          itemType: (i % 2 === 0 ? 'test' : 'injection') as 'test' | 'injection',
           dueDate: `2024-12-${21 + i % 10}`,
-          priority: i % 2 === 0 ? 'high' : 'normal'
+          daysDue: i % 10
         }))
       };
 
@@ -258,9 +271,12 @@ describe('/api/dashboard/recent', () => {
         recentActivity: [{
           id: 'test',
           patientName: 'Test',
+          patientNumber: 'P999',
           itemName: 'Test',
-          action: 'test',
-          timestamp: '2024-12-20T10:00:00Z',
+          itemType: 'test' as const,
+          scheduledDate: '2024-12-20T10:00:00Z',
+          completedDate: null,
+          actualCompletionDate: null,
           status: 'pending'
         }],
         upcomingSchedules: []

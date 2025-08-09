@@ -402,18 +402,20 @@ test.describe('Notification Journey E2E Tests', () => {
     let foundCount = 0;
     
     for (const schedule of dbSchedules.slice(0, 5)) { // Check first 5 schedules
-      if (schedule.patient?.name) {
-        const patientVisible = await page.locator(`text=/${schedule.patient.name}/`).isVisible().catch(() => false);
+      const patient = Array.isArray(schedule.patient) ? schedule.patient[0] : schedule.patient;
+      if (patient?.name) {
+        const patientVisible = await page.locator(`text=/${patient.name}/`).isVisible().catch(() => false);
         if (patientVisible) {
           foundCount++;
-          console.log(`Found patient ${schedule.patient.name} in UI`);
+          console.log(`Found patient ${patient.name} in UI`);
         }
       }
       
-      if (schedule.item?.name) {
-        const itemVisible = await page.locator(`text=/${schedule.item.name}/`).isVisible().catch(() => false);
+      const item = Array.isArray(schedule.item) ? schedule.item[0] : schedule.item;
+      if (item?.name) {
+        const itemVisible = await page.locator(`text=/${item.name}/`).isVisible().catch(() => false);
         if (itemVisible) {
-          console.log(`Found item ${schedule.item.name} in UI`);
+          console.log(`Found item ${item.name} in UI`);
         }
       }
     }

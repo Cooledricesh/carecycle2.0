@@ -62,7 +62,7 @@ export function PatientRegistrationForm() {
   // Fetch available items on mount
   useEffect(() => {
     fetchItems();
-  }, [fetchItems]);
+  }, []);
   
   const fetchItems = useCallback(async () => {
     try {

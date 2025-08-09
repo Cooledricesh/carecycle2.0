@@ -45,23 +45,15 @@ describe('/api/dashboard/trends', () => {
     it('should return dashboard trends with completion rates and distributions', async () => {
       const mockTrendsResponse: DashboardTrendsResponse = {
         weeklyCompletionRates: [
-          { week: 'Week 1', completionRate: 85.5 },
-          { week: 'Week 2', completionRate: 92.0 },
-          { week: 'Week 3', completionRate: 78.3 },
-          { week: 'Week 4', completionRate: 88.7 }
+          { week: '2024-01-01', weekLabel: 'Jan 1-7', completionRate: 85.5, completedCount: 17, totalScheduled: 20 },
+          { week: '2024-01-08', weekLabel: 'Jan 8-14', completionRate: 92.0, completedCount: 23, totalScheduled: 25 },
+          { week: '2024-01-15', weekLabel: 'Jan 15-21', completionRate: 78.3, completedCount: 15, totalScheduled: 19 },
+          { week: '2024-01-22', weekLabel: 'Jan 22-28', completionRate: 88.7, completedCount: 21, totalScheduled: 24 }
         ],
         itemTypeDistribution: [
-          { itemType: 'Blood Pressure', count: 45, percentage: 30.0 },
-          { itemType: 'Medication', count: 38, percentage: 25.3 },
-          { itemType: 'Exercise', count: 35, percentage: 23.3 },
-          { itemType: 'Diet', count: 32, percentage: 21.3 }
+          { type: 'test', count: 45, percentage: 60.0 },
+          { type: 'injection', count: 30, percentage: 40.0 }
         ],
-        monthlyPatientGrowth: [
-          { month: 'Jan', patients: 120 },
-          { month: 'Feb', patients: 135 },
-          { month: 'Mar', patients: 142 },
-          { month: 'Apr', patients: 158 }
-        ]
       };
 
       mockDashboardService.getTrends.mockResolvedValue(mockTrendsResponse);
@@ -78,8 +70,7 @@ describe('/api/dashboard/trends', () => {
     it('should handle empty trends data correctly', async () => {
       const mockTrendsResponse: DashboardTrendsResponse = {
         weeklyCompletionRates: [],
-        itemTypeDistribution: [],
-        monthlyPatientGrowth: []
+        itemTypeDistribution: []
       };
 
       mockDashboardService.getTrends.mockResolvedValue(mockTrendsResponse);
@@ -91,19 +82,15 @@ describe('/api/dashboard/trends', () => {
       expect(responseData).toEqual(mockTrendsResponse);
       expect(responseData.weeklyCompletionRates).toHaveLength(0);
       expect(responseData.itemTypeDistribution).toHaveLength(0);
-      expect(responseData.monthlyPatientGrowth).toHaveLength(0);
     });
 
     it('should handle single data point trends', async () => {
       const mockTrendsResponse: DashboardTrendsResponse = {
         weeklyCompletionRates: [
-          { week: 'Week 1', completionRate: 100.0 }
+          { week: '2024-01-01', weekLabel: 'Jan 1-7', completionRate: 100.0, completedCount: 5, totalScheduled: 5 }
         ],
         itemTypeDistribution: [
-          { itemType: 'Blood Pressure', count: 1, percentage: 100.0 }
-        ],
-        monthlyPatientGrowth: [
-          { month: 'Jan', patients: 1 }
+          { type: 'test', count: 1, percentage: 100.0 }
         ]
       };
 
@@ -120,16 +107,12 @@ describe('/api/dashboard/trends', () => {
     it('should handle trends with zero completion rates', async () => {
       const mockTrendsResponse: DashboardTrendsResponse = {
         weeklyCompletionRates: [
-          { week: 'Week 1', completionRate: 0.0 },
-          { week: 'Week 2', completionRate: 0.0 }
+          { week: '2024-01-01', weekLabel: 'Jan 1-7', completionRate: 0.0, completedCount: 0, totalScheduled: 10 },
+          { week: '2024-01-08', weekLabel: 'Jan 8-14', completionRate: 0.0, completedCount: 0, totalScheduled: 8 }
         ],
         itemTypeDistribution: [
-          { itemType: 'Blood Pressure', count: 0, percentage: 0.0 },
-          { itemType: 'Medication', count: 0, percentage: 0.0 }
-        ],
-        monthlyPatientGrowth: [
-          { month: 'Jan', patients: 0 },
-          { month: 'Feb', patients: 0 }
+          { type: 'test', count: 0, percentage: 0.0 },
+          { type: 'injection', count: 0, percentage: 0.0 }
         ]
       };
 
@@ -139,8 +122,8 @@ describe('/api/dashboard/trends', () => {
       const responseData = await response.json();
 
       expect(response.status).toBe(200);
-      expect(responseData.weeklyCompletionRates.every(w => w.completionRate === 0.0)).toBe(true);
-      expect(responseData.itemTypeDistribution.every(i => i.count === 0)).toBe(true);
+      expect(responseData.weeklyCompletionRates.every((w: any) => w.completionRate === 0.0)).toBe(true);
+      expect(responseData.itemTypeDistribution.every((i: any) => i.count === 0)).toBe(true);
     });
   });
 
@@ -217,8 +200,7 @@ describe('/api/dashboard/trends', () => {
     it('should create dashboard service with supabase client', async () => {
       const mockTrendsResponse: DashboardTrendsResponse = {
         weeklyCompletionRates: [],
-        itemTypeDistribution: [],
-        monthlyPatientGrowth: []
+        itemTypeDistribution: []
       };
 
       const mockSupabaseClient = { mock: 'client' };
@@ -234,9 +216,8 @@ describe('/api/dashboard/trends', () => {
 
     it('should return proper NextResponse format', async () => {
       const mockTrendsResponse: DashboardTrendsResponse = {
-        weeklyCompletionRates: [{ week: 'Week 1', completionRate: 50.0 }],
-        itemTypeDistribution: [{ itemType: 'Test', count: 1, percentage: 100.0 }],
-        monthlyPatientGrowth: [{ month: 'Jan', patients: 10 }]
+        weeklyCompletionRates: [{ week: '2024-01-01', weekLabel: 'Jan 1-7', completionRate: 50.0, completedCount: 5, totalScheduled: 10 }],
+        itemTypeDistribution: [{ type: 'test', count: 1, percentage: 100.0 }]
       };
 
       mockDashboardService.getTrends.mockResolvedValue(mockTrendsResponse);
@@ -251,19 +232,16 @@ describe('/api/dashboard/trends', () => {
     it('should handle complex trend data structures', async () => {
       const mockTrendsResponse: DashboardTrendsResponse = {
         weeklyCompletionRates: Array.from({ length: 52 }, (_, i) => ({
-          week: `Week ${i + 1}`,
-          completionRate: Math.random() * 100
+          week: `2024-${String(Math.floor(i / 4) + 1).padStart(2, '0')}-${String((i % 4) * 7 + 1).padStart(2, '0')}`,
+          weekLabel: `Week ${i + 1}`,
+          completionRate: Math.random() * 100,
+          completedCount: Math.floor(Math.random() * 20),
+          totalScheduled: 20
         })),
         itemTypeDistribution: [
-          { itemType: 'Blood Pressure', count: 234, percentage: 32.5 },
-          { itemType: 'Medication', count: 189, percentage: 26.2 },
-          { itemType: 'Exercise', count: 156, percentage: 21.6 },
-          { itemType: 'Diet', count: 142, percentage: 19.7 }
-        ],
-        monthlyPatientGrowth: Array.from({ length: 12 }, (_, i) => ({
-          month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i],
-          patients: 100 + (i * 15) + Math.floor(Math.random() * 20)
-        }))
+          { type: 'test', count: 234, percentage: 55.8 },
+          { type: 'injection', count: 186, percentage: 44.2 }
+        ]
       };
 
       mockDashboardService.getTrends.mockResolvedValue(mockTrendsResponse);
@@ -273,8 +251,7 @@ describe('/api/dashboard/trends', () => {
 
       expect(response.status).toBe(200);
       expect(responseData.weeklyCompletionRates).toHaveLength(52);
-      expect(responseData.itemTypeDistribution).toHaveLength(4);
-      expect(responseData.monthlyPatientGrowth).toHaveLength(12);
+      expect(responseData.itemTypeDistribution).toHaveLength(2);
     });
   });
 });

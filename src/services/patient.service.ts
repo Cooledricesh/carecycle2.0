@@ -42,7 +42,7 @@ export class PatientService {
         schedule.firstDate,
         {
           value: schedule.periodValue,
-          unit: schedule.periodUnit
+          unit: schedule.periodUnit as 'days' | 'weeks' | 'months' | 'years'
         }
       ).toISOString().split('T')[0]
     }));

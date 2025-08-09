@@ -61,14 +61,14 @@ function NotificationBellComponent() {
           {unreadCount > 0 && (
             <Badge
               className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs"
-              variant="destructive"
+              color="danger"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-80 p-0">
         <div className="border-b px-4 py-3">
           <h3 className="font-semibold">알림</h3>
           <p className="text-sm text-muted-foreground">
@@ -120,7 +120,7 @@ function NotificationBellComponent() {
                           <span className="text-sm">
                             {notification.item?.name}
                           </span>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="faded" className="text-xs">
                             {getItemTypeLabel(notification.item?.type as NotificationType | undefined)}
                           </Badge>
                         </div>

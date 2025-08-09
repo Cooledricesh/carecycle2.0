@@ -308,14 +308,16 @@ test.describe('Notification System E2E Tests', () => {
 
     // Verify each schedule appears in UI
     for (const schedule of schedules.slice(0, 3)) { // Check first 3 schedules
-      if (schedule.patient?.name) {
-        const patientVisible = await page.locator(`text=/${schedule.patient.name}/`).isVisible().catch(() => false);
-        console.log(`Patient ${schedule.patient.name} visible:`, patientVisible);
+      const patient = Array.isArray(schedule.patient) ? schedule.patient[0] : schedule.patient;
+      if (patient?.name) {
+        const patientVisible = await page.locator(`text=/${patient.name}/`).isVisible().catch(() => false);
+        console.log(`Patient ${patient.name} visible:`, patientVisible);
       }
       
-      if (schedule.item?.name) {
-        const itemVisible = await page.locator(`text=/${schedule.item.name}/`).isVisible().catch(() => false);
-        console.log(`Item ${schedule.item.name} visible:`, itemVisible);
+      const item = Array.isArray(schedule.item) ? schedule.item[0] : schedule.item;
+      if (item?.name) {
+        const itemVisible = await page.locator(`text=/${item.name}/`).isVisible().catch(() => false);
+        console.log(`Item ${item.name} visible:`, itemVisible);
       }
     }
 

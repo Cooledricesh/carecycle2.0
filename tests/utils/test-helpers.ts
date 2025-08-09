@@ -289,7 +289,7 @@ export async function getNotificationItems(page: Page): Promise<Array<{
       items.push({
         title: title || 'No title',
         message: message || 'No message', 
-        time: time || undefined,
+        time: time || '',
         read: isRead
       });
     }
@@ -698,7 +698,10 @@ export async function takeComparisonScreenshots(page: Page, name: string, action
     const beforeName = `${name}-step-${i + 1}-before`;
     screenshots.push(await takeScreenshot(page, beforeName));
     
-    await actions[i]();
+    const action = actions[i];
+    if (action) {
+      await action();
+    }
     await page.waitForTimeout(500); // Allow UI to settle
     
     const afterName = `${name}-step-${i + 1}-after`;

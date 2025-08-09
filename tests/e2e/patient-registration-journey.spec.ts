@@ -103,7 +103,7 @@ test.describe('Patient Registration Journey E2E Tests', () => {
     // Fill dates
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const dateStr = tomorrow.toISOString().split('T')[0];
+    const dateStr = tomorrow.toISOString().split('T')[0] || tomorrow.toLocaleDateString('sv-SE');
     
     await patientRegistrationPage.fillAllDateInputs(dateStr);
     await patientRegistrationPage.takeScreenshot('dates-filled');
@@ -196,7 +196,7 @@ test.describe('Patient Registration Journey E2E Tests', () => {
     
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const dateStr = tomorrow.toISOString().split('T')[0];
+    const dateStr = tomorrow.toISOString().split('T')[0] || tomorrow.toLocaleDateString('sv-SE');
     await patientRegistrationPage.fillAllDateInputs(dateStr);
     
     await patientRegistrationPage.submitForm();
@@ -281,7 +281,7 @@ test.describe('Patient Registration Journey E2E Tests', () => {
     // Fill all date inputs
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const dateStr = tomorrow.toISOString().split('T')[0];
+    const dateStr = tomorrow.toISOString().split('T')[0] || tomorrow.toLocaleDateString('sv-SE');
     await patientRegistrationPage.fillAllDateInputs(dateStr);
 
     // Submit form

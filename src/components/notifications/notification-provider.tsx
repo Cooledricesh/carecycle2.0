@@ -65,28 +65,34 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       if (!error && data) {
         // Validate and transform data
-        const validNotifications = data.map(item => ({
-          id: item.id,
-          patient_id: item.patient?.id ?? '',
-          item_id: item.item?.id ?? '',
-          next_due_date: item.next_due_date,
-          is_notified: item.is_notified ?? false,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          patient: item.patient ? {
-            id: item.patient.id ?? '',
-            name: item.patient.name,
-            patient_number: item.patient.patient_number,
-          } : undefined,
-          item: item.item ? {
-            id: item.item.id ?? '',
-            name: item.item.name,
-            type: item.item.type as 'test' | 'injection',
-            period_value: 0,
-            period_unit: 'weeks' as const,
-          } : undefined,
-        } as Notification));
+        const validNotifications = data.map(item => {
+          // Handle the case where patient/item might be arrays (shouldn't happen with our query but let's be safe)
+          const patient = Array.isArray(item.patient) ? item.patient[0] : item.patient;
+          const itemData = Array.isArray(item.item) ? item.item[0] : item.item;
+          
+          return {
+            id: item.id,
+            patient_id: (patient as any)?.id ?? '',
+            item_id: (itemData as any)?.id ?? '',
+            next_due_date: item.next_due_date,
+            is_notified: item.is_notified ?? false,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            patient: patient ? {
+              id: (patient as any).id ?? '',
+              name: patient.name ?? '',
+              patient_number: patient.patient_number ?? '',
+            } : undefined,
+            item: itemData ? {
+              id: (itemData as any).id ?? '',
+              name: itemData.name ?? '',
+              type: (itemData.type as 'test' | 'injection') ?? 'test',
+              period_value: 0,
+              period_unit: 'weeks' as const,
+            } : undefined,
+          } as Notification;
+        });
         
         setNotifications(validNotifications);
         setUnreadCount(validNotifications.filter(n => !n.is_notified).length);

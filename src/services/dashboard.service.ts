@@ -265,10 +265,10 @@ export class DashboardService {
 
       return {
         id: schedule.id,
-        patientName: schedule.patients.name,
-        patientNumber: schedule.patients.patient_number,
-        itemName: schedule.items.name,
-        itemType: schedule.items.type as 'test' | 'injection',
+        patientName: (schedule.patients as any)?.name || '',
+        patientNumber: (schedule.patients as any)?.patient_number || '',
+        itemName: (schedule.items as any)?.name || '',
+        itemType: ((schedule.items as any)?.type as 'test' | 'injection') || 'test',
         dueDate: schedule.next_due_date,
         daysDue
       };
@@ -306,7 +306,7 @@ export class DashboardService {
 
       rates.push({
         week: startStr,
-        weekLabel: this.formatWeekLabel(weekStart, weekEnd),
+        weekLabel: this.formatWeekLabel(weekStart, weekEnd) || `${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일-${weekEnd.getDate()}일`,
         completionRate: Math.round(completionRate),
         completedCount,
         totalScheduled
@@ -341,11 +341,11 @@ export class DashboardService {
     }
 
     const testCount = data?.filter(
-      item => item.patient_schedules.items.type === 'test'
+      item => (item.patient_schedules as any)?.items?.type === 'test'
     ).length || 0;
     
     const injectionCount = data?.filter(
-      item => item.patient_schedules.items.type === 'injection'
+      item => (item.patient_schedules as any)?.items?.type === 'injection'
     ).length || 0;
 
     const total = testCount + injectionCount;

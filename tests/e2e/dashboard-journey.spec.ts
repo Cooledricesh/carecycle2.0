@@ -353,8 +353,10 @@ test.describe('Dashboard Journey E2E Tests', () => {
       const today = new Date();
       const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
       
-      await dateRangeInputs.first().fill(lastWeek.toISOString().split('T')[0]);
-      await dateRangeInputs.nth(1).fill(today.toISOString().split('T')[0]);
+      const firstInput = dateRangeInputs.first();
+      const secondInput = dateRangeInputs.nth(1);
+      await firstInput.fill(lastWeek.toISOString().split('T')[0]);
+      await secondInput.fill(today.toISOString().split('T')[0]);
       await page.waitForTimeout(2000);
       await dashboardPage.takeScreenshot('date-filter-applied');
     }

@@ -155,7 +155,7 @@ export class DashboardPage extends BasePage {
 
     // Verify chart has data or shows empty state
     const chartContent = await this.weeklyTrendChart.textContent().catch(() => '');
-    expect(chartContent.length).toBeGreaterThan(0);
+    expect(chartContent?.length || 0).toBeGreaterThan(0);
   }
 
   async verifyRecentActivity(): Promise<void> {

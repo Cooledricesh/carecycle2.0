@@ -23,7 +23,7 @@ export function NotificationSettings() {
 
   useEffect(() => {
     fetchSettings();
-  }, [fetchSettings]);
+  }, []);
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);
@@ -110,8 +110,8 @@ export function NotificationSettings() {
               </p>
             </div>
             <Switch
-              checked={settings.notification_enabled}
-              onCheckedChange={(checked) =>
+              isSelected={settings.notification_enabled}
+              onValueChange={(checked: boolean) =>
                 setSettings({ ...settings, notification_enabled: checked })
               }
             />
@@ -128,11 +128,11 @@ export function NotificationSettings() {
               </p>
             </div>
             <Switch
-              checked={settings.email_notifications}
-              onCheckedChange={(checked) =>
+              isSelected={settings.email_notifications}
+              onValueChange={(checked: boolean) =>
                 setSettings({ ...settings, email_notifications: checked })
               }
-              disabled={!settings.notification_enabled}
+              isDisabled={!settings.notification_enabled}
             />
           </div>
 
@@ -147,11 +147,11 @@ export function NotificationSettings() {
               </p>
             </div>
             <Switch
-              checked={settings.push_notifications}
-              onCheckedChange={(checked) =>
+              isSelected={settings.push_notifications}
+              onValueChange={(checked: boolean) =>
                 setSettings({ ...settings, push_notifications: checked })
               }
-              disabled={!settings.notification_enabled}
+              isDisabled={!settings.notification_enabled}
             />
           </div>
         </div>

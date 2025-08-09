@@ -95,7 +95,7 @@ describe('PatientRegistrationForm', () => {
     await waitFor(() => {
       expect(screen.getByLabelText(/환자 번호/i)).toBeInTheDocument()
       if (items.length > 0) {
-        expect(screen.getByText(items[0].name)).toBeInTheDocument()
+        expect(screen.getByText(items[0]!.name)).toBeInTheDocument()
       }
     }, { timeout: 3000 })
 
@@ -232,7 +232,9 @@ describe('PatientRegistrationForm', () => {
 
       // Select an item
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       // Wait for date field to appear and find the date setting section
       await waitFor(() => {
@@ -302,8 +304,11 @@ describe('PatientRegistrationForm', () => {
       expect(checkboxes).toHaveLength(4)
 
       // Select first item
-      await user.click(checkboxes[0])
-      expect(checkboxes[0]).toBeChecked()
+      const firstCheckbox = checkboxes[0];
+      if (firstCheckbox) {
+        await user.click(firstCheckbox)
+        expect(firstCheckbox).toBeChecked()
+      }
       
       // Check selection indicator appears
       await waitFor(() => {
@@ -325,7 +330,9 @@ describe('PatientRegistrationForm', () => {
       await renderWithItems()
 
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       // Date field should appear
       await waitFor(() => {
@@ -379,7 +386,9 @@ describe('PatientRegistrationForm', () => {
       const checkbox = screen.getAllByRole('checkbox')[0]
       expect(checkbox).not.toBeChecked()
 
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       // Checkbox should be selected
       expect(checkbox).toBeChecked()
@@ -390,7 +399,9 @@ describe('PatientRegistrationForm', () => {
       })
 
       // Click again to deselect
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
       expect(checkbox).not.toBeChecked()
     })
   })
@@ -427,7 +438,9 @@ describe('PatientRegistrationForm', () => {
 
       // Select an item
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       // Fill date
       await waitFor(() => {
@@ -490,7 +503,9 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       await waitFor(() => {
         const dateInput = document.querySelector('input[type="date"]')!
@@ -540,7 +555,9 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       await waitFor(() => {
         const dateInput = document.querySelector('input[type="date"]')!
@@ -585,7 +602,9 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       await waitFor(() => {
         const dateInput = document.querySelector('input[type="date"]')!
@@ -624,7 +643,9 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       await waitFor(() => {
         const dateInput = document.querySelector('input[type="date"]')!
@@ -827,7 +848,9 @@ describe('PatientRegistrationForm', () => {
 
       // Focus should remain manageable throughout form interaction
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
       
       // Focus should be preserved or handled gracefully
       expect(document.activeElement).toBeDefined()
@@ -862,7 +885,9 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       await waitFor(() => {
         const dateInput = document.querySelector('input[type="date"]')!
@@ -905,9 +930,15 @@ describe('PatientRegistrationForm', () => {
       const checkbox = screen.getAllByRole('checkbox')[0]
       
       // Test that rapid toggling works - 3 clicks should end up selected
-      await user.click(checkbox) // Selected
-      await user.click(checkbox) // Deselected  
-      await user.click(checkbox) // Selected
+      if (checkbox) {
+        await user.click(checkbox)
+      } // Selected
+      if (checkbox) {
+        await user.click(checkbox)
+      } // Deselected  
+      if (checkbox) {
+        await user.click(checkbox)
+      } // Selected
       
       // Final state should be selected
       await waitFor(() => {
@@ -929,7 +960,9 @@ describe('PatientRegistrationForm', () => {
 
       // Select item
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       // Set invalid date manually
       await waitFor(() => {
@@ -972,7 +1005,9 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       await waitFor(() => {
         const dateInput = document.querySelector('input[type="date"]')!
@@ -1044,7 +1079,9 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       const checkbox = screen.getAllByRole('checkbox')[0]
-      await user.click(checkbox)
+      if (checkbox) {
+        await user.click(checkbox)
+      }
 
       await waitFor(() => {
         const dateInput = document.querySelector('input[type="date"]')!
