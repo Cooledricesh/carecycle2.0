@@ -60,7 +60,7 @@ describe('Auth Configuration', () => {
       } as any)
 
       expect(result).toBeDefined()
-      expect(result?.user?.id).toBe('user-123')
+      expect((result?.user as any)?.id).toBe('user-123')
       expect(result?.user?.name).toBe('Test User')
       expect(result?.user?.email).toBe('test@example.com')
     })
@@ -82,7 +82,7 @@ describe('Auth Configuration', () => {
       } as any)
 
       expect(result).toBeDefined()
-      expect(result?.user?.id).toBe('')
+      expect((result?.user as any)?.id).toBe('')
       expect(result?.user?.name).toBe('Test User')
       expect(result?.user?.email).toBe('test@example.com')
     })
@@ -126,7 +126,7 @@ describe('Auth Configuration', () => {
       } as any)
 
       expect(result).toBeDefined()
-      expect(result?.user?.id).toBe('user-123')
+      expect((result?.user as any)?.id).toBe('user-123')
     })
 
     it('handles empty token sub gracefully', async () => {
@@ -153,7 +153,7 @@ describe('Auth Configuration', () => {
       } as any)
 
       expect(result).toBeDefined()
-      expect(result?.user?.id).toBe('')
+      expect((result?.user as any)?.id).toBe('')
     })
 
     it('handles undefined token sub gracefully', async () => {
@@ -181,7 +181,7 @@ describe('Auth Configuration', () => {
 
       expect(result).toBeDefined()
       // When token.sub is undefined, casting as string makes it "undefined"
-      expect(result?.user?.id).toBe(undefined)
+      expect((result?.user as any)?.id).toBe(undefined)
     })
   })
 
