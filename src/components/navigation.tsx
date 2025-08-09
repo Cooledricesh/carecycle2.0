@@ -21,7 +21,6 @@ import {
   Activity,
   Heart,
   Sparkles,
-  Bell,
   Settings,
   Users,
   ChevronRight,
@@ -30,6 +29,7 @@ import {
 } from 'lucide-react';
 import NextLink from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,7 +37,6 @@ export default function Navigation() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [notifications] = useState(3);
 
   useEffect(() => {
     setMounted(true);
@@ -244,17 +243,7 @@ export default function Navigation() {
 
         {/* Notifications */}
         <NavbarItem>
-          <Badge content={notifications} color="danger" shape="circle" size="sm">
-            <Button
-              variant="light"
-              size="sm"
-              isIconOnly
-              className="text-slate-600 dark:text-slate-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20"
-              aria-label={`알림 ${notifications}개`}
-            >
-              <Bell className="w-5 h-5" aria-hidden="true" />
-            </Button>
-          </Badge>
+          <NotificationBell />
         </NavbarItem>
 
         {/* Theme Toggle with Animation */}

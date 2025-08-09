@@ -35,11 +35,11 @@ const hasSentryEnv = Boolean(
 // Sentry configuration options
 const sentryWebpackPluginOptions = {
   // Organization and project from environment variables (no defaults)
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
+  org: process.env.SENTRY_ORG || '',
+  project: process.env.SENTRY_PROJECT || '',
   
   // Auth token for uploading source maps
-  authToken: process.env.SENTRY_AUTH_TOKEN,
+  authToken: process.env.SENTRY_AUTH_TOKEN || '',
   
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,

@@ -48,4 +48,14 @@ next-env.d.ts
 
 # MCP Configuration (contains sensitive data)
 .mcp.json
+.claude/mcp.json
+
+# Playwright Test Artifacts
+playwright-report/
+playwright/.cache/
+test-results/
+tests/screenshots/
+tests/videos/
+tests/traces/
+.env.test.local
 .mcp.secure.json

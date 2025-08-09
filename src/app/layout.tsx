@@ -6,6 +6,7 @@ import { AuthProvider } from '@/components/auth/auth-provider';
 import { Analytics } from '@/components/analytics';
 import ErrorBoundary from '@/components/error-boundary';
 import Navigation from '@/components/navigation';
+import { NotificationProvider } from '@/components/notifications/notification-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,16 +36,18 @@ export default function RootLayout({
         <ErrorBoundary>
           <Providers>
             <AuthProvider>
-              <Navigation />
-              <main>
-                {children}
-              </main>
+              <NotificationProvider>
+                <Navigation />
+                <main>
+                  {children}
+                </main>
+              </NotificationProvider>
             </AuthProvider>
           </Providers>
         </ErrorBoundary>
         <Analytics 
-          gaId={process.env.NEXT_PUBLIC_GA_ID}
-          clarityId={process.env.NEXT_PUBLIC_CLARITY_ID}
+          {...(process.env.NEXT_PUBLIC_GA_ID && { gaId: process.env.NEXT_PUBLIC_GA_ID })}
+          {...(process.env.NEXT_PUBLIC_CLARITY_ID && { clarityId: process.env.NEXT_PUBLIC_CLARITY_ID })}
         />
       </body>
     </html>
