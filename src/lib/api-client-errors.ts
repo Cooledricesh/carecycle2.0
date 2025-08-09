@@ -16,8 +16,12 @@ export function createApiClientError(
 ): ApiClientError {
   const error: ApiClientError = new Error(message);
   error.name = 'ApiClientError';
-  error.status = status;
-  error.code = code;
+  if (status !== undefined) {
+    error.status = status;
+  }
+  if (code !== undefined) {
+    error.code = code;
+  }
   error.response = response;
   return error;
 }

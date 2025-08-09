@@ -91,7 +91,9 @@ describe('/api/dashboard/fix-column', () => {
 
       it('should fallback to direct select when RPC fails', async () => {
         // Mock RPC failure, then successful select
-        mockSupabaseClient.rpc.mockRejectedValueOnce(new Error('RPC not available'));
+        mockSupabaseClient.rpc.mockImplementationOnce(() => 
+          Promise.reject(new Error('RPC not available'))
+        );
         
         const mockSelectQuery = {
           select: jest.fn().mockReturnValue({
@@ -112,7 +114,9 @@ describe('/api/dashboard/fix-column', () => {
 
       it('should detect column does not exist via select error', async () => {
         // Mock RPC failure, then select with column not exist error
-        mockSupabaseClient.rpc.mockRejectedValueOnce(new Error('RPC not available'));
+        mockSupabaseClient.rpc.mockImplementationOnce(() => 
+          Promise.reject(new Error('RPC not available'))
+        );
         
         const mockSelectQuery = {
           select: jest.fn().mockReturnValue({
@@ -133,7 +137,9 @@ describe('/api/dashboard/fix-column', () => {
 
       it('should handle fallback select error', async () => {
         // Mock both RPC and fallback select failure
-        mockSupabaseClient.rpc.mockRejectedValueOnce(new Error('RPC not available'));
+        mockSupabaseClient.rpc.mockImplementationOnce(() => 
+          Promise.reject(new Error('RPC not available'))
+        );
         
         const mockSelectQuery = {
           select: jest.fn().mockReturnValue({

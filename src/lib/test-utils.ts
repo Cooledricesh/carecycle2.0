@@ -203,6 +203,62 @@ export const mockConsole = () => {
   return mockedMethods;
 };
 
+// Create mock Supabase client
+export const createMockSupabaseClient = () => {
+  const mockRpc = jest.fn();
+  const mockFrom = jest.fn();
+  
+  // Create chainable query builder
+  const createQueryBuilder = () => {
+    const builder: any = {
+      select: jest.fn().mockImplementation((columns, options) => {
+        // Handle count queries
+        if (options?.count === 'exact') {
+          return Promise.resolve({ count: 0, error: null });
+        }
+        return builder;
+      }),
+      insert: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      neq: jest.fn().mockReturnThis(),
+      gt: jest.fn().mockReturnThis(),
+      gte: jest.fn().mockReturnThis(),
+      lt: jest.fn().mockReturnThis(),
+      lte: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
+      contains: jest.fn().mockReturnThis(),
+      containedBy: jest.fn().mockReturnThis(),
+      range: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+      limit: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+    };
+    
+    // Make select chainable
+    builder.select.mockReturnValue(builder);
+    
+    return builder;
+  };
+  
+  const mockClient = {
+    from: mockFrom,
+    rpc: mockRpc,
+    auth: {
+      getSession: jest.fn(),
+      signInWithPassword: jest.fn(),
+      signOut: jest.fn(),
+    },
+  };
+
+  // Setup default from() behavior
+  mockFrom.mockImplementation(() => createQueryBuilder());
+
+  return mockClient;
+};
+
 // Environment variable mocking
 export const mockEnvironmentVariables = (env: Record<string, string>) => {
   const originalEnv = process.env;

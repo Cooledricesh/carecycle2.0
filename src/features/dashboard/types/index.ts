@@ -3,6 +3,17 @@
  * Types specific to the dashboard feature
  */
 
+import type {
+  DashboardStatsResponse,
+  DashboardRecentResponse,
+  DashboardTrendsResponse,
+  RecentActivity,
+  UpcomingSchedule,
+  WeeklyCompletionRate,
+  ItemTypeDistribution,
+  DashboardErrorResponse
+} from '@/types/dashboard';
+
 // Re-export shared dashboard types from global types
 export type {
   DashboardStatsResponse,
