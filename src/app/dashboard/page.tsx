@@ -57,25 +57,25 @@ export default function Dashboard() {
 
         {/* Stats Cards */}
         <StatsCards 
-          stats={statsQuery.data} 
+          {...(statsQuery.data && { stats: statsQuery.data })}
           isLoading={statsQuery.isLoading} 
         />
 
         {/* Trends Section - Weekly completion rates and item distribution */}
         <TrendsSection 
-          trends={trendsQuery.data} 
+          {...(trendsQuery.data && { trends: trendsQuery.data })}
           isLoading={trendsQuery.isLoading} 
         />
 
         {/* Completion Rates Summary */}
         <CompletionRatesSummary 
-          stats={statsQuery.data} 
+          {...(statsQuery.data && { stats: statsQuery.data })}
           isLoading={statsQuery.isLoading} 
         />
 
         {/* Activity Section - Recent activity and upcoming schedules */}
         <ActivitySection 
-          recent={recentQuery.data} 
+          {...(recentQuery.data && { recent: recentQuery.data })}
           isLoading={recentQuery.isLoading} 
         />
 

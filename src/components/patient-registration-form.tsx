@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -62,9 +62,9 @@ export function PatientRegistrationForm() {
   // Fetch available items on mount
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [fetchItems]);
   
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     try {
       const response = await fetch('/api/items');
       if (!response.ok) throw new Error('Failed to fetch items');
@@ -78,7 +78,7 @@ export function PatientRegistrationForm() {
         variant: 'destructive'
       });
     }
-  };
+  }, [toast]);
   
   const handleItemToggle = (itemId: string, checked: boolean) => {
     const item = items.find(i => i.id === itemId);

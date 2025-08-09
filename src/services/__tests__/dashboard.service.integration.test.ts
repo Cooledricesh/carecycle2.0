@@ -96,7 +96,7 @@ describe('Dashboard Service Clean Architecture Integration', () => {
 
     it('should enable easy testing through mocking', () => {
       // Service layer enables easy unit testing by accepting mock dependencies
-      let methodsCalled: string[] = [];
+      const methodsCalled: string[] = [];
       
       const spySupabase = {
         from: jest.fn().mockImplementation((table) => {

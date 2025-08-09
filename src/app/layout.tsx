@@ -46,8 +46,8 @@ export default function RootLayout({
           </Providers>
         </ErrorBoundary>
         <Analytics 
-          gaId={process.env.NEXT_PUBLIC_GA_ID}
-          clarityId={process.env.NEXT_PUBLIC_CLARITY_ID}
+          {...(process.env.NEXT_PUBLIC_GA_ID && { gaId: process.env.NEXT_PUBLIC_GA_ID })}
+          {...(process.env.NEXT_PUBLIC_CLARITY_ID && { clarityId: process.env.NEXT_PUBLIC_CLARITY_ID })}
         />
       </body>
     </html>

@@ -198,7 +198,7 @@ export function PatientRegistrationForm() {
                     <div className="text-center text-gray-500">
                       <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                       <p>No schedules added yet</p>
-                      <p className="text-sm">Click "Add Schedule" to get started</p>
+                      <p className="text-sm">Click &quot;Add Schedule&quot; to get started</p>
                     </div>
                   </CardContent>
                 </Card>

@@ -32,7 +32,15 @@ export async function POST(request: NextRequest) {
         span.setAttribute('schedule.id', updateData.scheduleId);
         span.setAttribute('schedule.isCompleted', updateData.isCompleted);
         
-        await scheduleService.updateScheduleCompletion(updateData);
+        // Ensure optional fields are properly typed
+        const scheduleUpdate: Parameters<typeof scheduleService.updateScheduleCompletion>[0] = {
+          scheduleId: updateData.scheduleId,
+          isCompleted: updateData.isCompleted,
+          ...(updateData.notes !== undefined && { notes: updateData.notes }),
+          ...(updateData.actualCompletionDate !== undefined && { actualCompletionDate: updateData.actualCompletionDate }),
+        };
+        
+        await scheduleService.updateScheduleCompletion(scheduleUpdate);
         
         return NextResponse.json({ 
           success: true,

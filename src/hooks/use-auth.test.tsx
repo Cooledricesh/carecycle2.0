@@ -31,9 +31,11 @@ const mockSignOut = signOut as jest.Mock
 
 // Wrapper component for testing
 const createWrapper = () => {
-  return ({ children }: { children: React.ReactNode }) => (
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <AuthProvider>{children}</AuthProvider>
-  )
+  );
+  TestWrapper.displayName = 'TestWrapper';
+  return TestWrapper;
 }
 
 describe('useAuth Hook', () => {

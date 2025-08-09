@@ -212,7 +212,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       channel.unsubscribe();
       clearInterval(interval);
     };
-  }, []);
+  }, [fetchNotifications, supabase]);
 
   const contextValue = useMemo(() => ({
     unreadCount,

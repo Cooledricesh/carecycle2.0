@@ -178,7 +178,7 @@ export function ScheduleList() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Today's Schedule</h2>
+          <h2 className="text-2xl font-bold">Today&apos;s Schedule</h2>
           <Clock className="h-5 w-5 animate-spin" />
         </div>
         <div className="space-y-4">
@@ -202,7 +202,7 @@ export function ScheduleList() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Today's Schedule</h2>
+          <h2 className="text-2xl font-bold">Today&apos;s Schedule</h2>
           <AlertTriangle className="h-5 w-5 text-red-500" />
         </div>
         <Card>
@@ -230,7 +230,7 @@ export function ScheduleList() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Today's Schedule</h2>
+        <h2 className="text-2xl font-bold">Today&apos;s Schedule</h2>
         <Badge variant="outline" className="px-3 py-1">
           {schedules.length} item{schedules.length !== 1 ? 's' : ''}
         </Badge>

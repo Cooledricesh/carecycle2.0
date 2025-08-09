@@ -12,7 +12,8 @@ import {
 import { Badge } from '@heroui/badge';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import type { Notification, NotificationType } from '@/types/notifications';
+import type { Notification } from '@/types/notifications';
+import { NotificationType } from '@/types/notifications';
 
 function NotificationBellComponent() {
   const { unreadCount, notifications, markAsRead, isLoading, error } = useNotifications();
@@ -48,7 +49,7 @@ function NotificationBellComponent() {
   }, [notifications]);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover isOpen={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"

@@ -5,6 +5,8 @@
 
 import * as Sentry from '@sentry/nextjs';
 import { toast } from 'sonner';
+import React from 'react';
+import { NextResponse } from 'next/server';
 
 export enum ErrorSeverity {
   LOW = 'low',
@@ -379,4 +381,31 @@ export function useErrorHandler() {
     handleError,
     handleAsyncError,
   };
+}
+
+/**
+ * Handle API errors and return appropriate NextResponse
+ */
+export function handleApiError(
+  error: unknown,
+  options?: {
+    defaultMessage?: string;
+    context?: string;
+    statusCode?: number;
+  }
+) {
+  const { defaultMessage = 'An error occurred', context, statusCode = 500 } = options || {};
+  
+  const appError = errorHandler.handleError(error, { context });
+  
+  return NextResponse.json(
+    {
+      error: appError.message || defaultMessage,
+      ...(process.env.NODE_ENV === 'development' && { 
+        stack: appError.stack,
+        details: appError.context 
+      })
+    },
+    { status: statusCode }
+  );
 }

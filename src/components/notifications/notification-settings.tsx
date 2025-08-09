@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Switch } from '@heroui/switch';
 import { Button } from '@heroui/button';
@@ -23,9 +23,9 @@ export function NotificationSettings() {
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [fetchSettings]);
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -47,7 +47,7 @@ export function NotificationSettings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
   const saveSettings = async () => {
     setSaving(true);
