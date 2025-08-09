@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, Clock, AlertTriangle, User, Calendar } from 'lucide-react';
 import { useTodaySchedules, useUpdateSchedule } from '@/features/schedule/hooks/use-schedule-data';
-import type { Schedule } from '@/features/schedule/types';
+import type { Schedule, ScheduleUpdateRequest } from '@/features/schedule/types';
 
 interface ScheduleItemProps {
   schedule: Schedule;
@@ -166,12 +166,13 @@ export function ScheduleList() {
     notes?: string, 
     actualCompletionDate?: string
   ) => {
-    updateScheduleMutation.mutate({
+    const updateRequest: ScheduleUpdateRequest = {
       scheduleId,
       isCompleted,
-      notes,
-      actualCompletionDate,
-    });
+      ...(notes !== undefined && { notes }),
+      ...(actualCompletionDate !== undefined && { actualCompletionDate }),
+    };
+    updateScheduleMutation.mutate(updateRequest);
   };
 
   if (isLoading) {

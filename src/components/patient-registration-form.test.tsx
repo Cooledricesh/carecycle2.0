@@ -170,7 +170,8 @@ describe('PatientRegistrationForm', () => {
       const user = userEvent.setup()
       await renderWithItems()
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       
       await act(async () => {
         fireEvent.submit(form)
@@ -189,7 +190,8 @@ describe('PatientRegistrationForm', () => {
       const patientNumberInput = screen.getByLabelText(/환자 번호/i)
       await user.type(patientNumberInput, 'P12345')
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       
       await act(async () => {
         fireEvent.submit(form)
@@ -231,17 +233,17 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       // Select an item
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       // Wait for date field to appear and find the date setting section
       await waitFor(() => {
         expect(screen.getByText(/최초 시행일 설정/i)).toBeInTheDocument()
       })
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       
       await act(async () => {
         fireEvent.submit(form)
@@ -304,11 +306,10 @@ describe('PatientRegistrationForm', () => {
       expect(checkboxes).toHaveLength(4)
 
       // Select first item
-      const firstCheckbox = checkboxes[0];
-      if (firstCheckbox) {
-        await user.click(firstCheckbox)
-        expect(firstCheckbox).toBeChecked()
-      }
+      const selectedCheckbox = checkboxes[0];
+      if (!selectedCheckbox) throw new Error('First checkbox not found');
+      await user.click(selectedCheckbox);
+      expect(selectedCheckbox).toBeChecked();
       
       // Check selection indicator appears
       await waitFor(() => {
@@ -316,8 +317,10 @@ describe('PatientRegistrationForm', () => {
       })
 
       // Deselect item
-      await user.click(checkboxes[0])
-      expect(checkboxes[0]).not.toBeChecked()
+      const checkboxToDeselect = checkboxes[0];
+      if (!checkboxToDeselect) throw new Error('First checkbox not found');
+      await user.click(checkboxToDeselect);
+      expect(checkboxToDeselect).not.toBeChecked();
 
       // Selection indicator should disappear
       await waitFor(() => {
@@ -329,10 +332,9 @@ describe('PatientRegistrationForm', () => {
       const user = userEvent.setup()
       await renderWithItems()
 
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       // Date field should appear
       await waitFor(() => {
@@ -348,13 +350,16 @@ describe('PatientRegistrationForm', () => {
       const checkboxes = screen.getAllByRole('checkbox')
       
       // Select multiple items
-      await user.click(checkboxes[0])
-      await user.click(checkboxes[1])
-      await user.click(checkboxes[2])
+      if (!checkboxes[0] || !checkboxes[1] || !checkboxes[2]) {
+        throw new Error('Required checkboxes not found');
+      }
+      await user.click(checkboxes[0]);
+      await user.click(checkboxes[1]);
+      await user.click(checkboxes[2]);
 
-      expect(checkboxes[0]).toBeChecked()
-      expect(checkboxes[1]).toBeChecked()
-      expect(checkboxes[2]).toBeChecked()
+      expect(checkboxes[0]).toBeChecked();
+      expect(checkboxes[1]).toBeChecked();
+      expect(checkboxes[2]).toBeChecked();
 
       // Check selection count
       await waitFor(() => {
@@ -386,9 +391,8 @@ describe('PatientRegistrationForm', () => {
       const checkbox = screen.getAllByRole('checkbox')[0]
       expect(checkbox).not.toBeChecked()
 
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       // Checkbox should be selected
       expect(checkbox).toBeChecked()
@@ -399,9 +403,8 @@ describe('PatientRegistrationForm', () => {
       })
 
       // Click again to deselect
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
       expect(checkbox).not.toBeChecked()
     })
   })
@@ -437,19 +440,20 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       // Select an item
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       // Fill date
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]')!
-        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+        const dateInput = document.querySelector('input[type="date"]');
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
       })
 
       // Submit form using form submission to avoid button ripple issues
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
 
       await waitFor(() => {
@@ -502,18 +506,19 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNumberInput, 'P12345')
       await user.type(patientNameInput, '홍길동')
 
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]')!
-        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+        const dateInput = document.querySelector('input[type="date"]');
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
       })
 
       // Submit form
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
 
       // Check loading state by looking for the disabled state and loading text
@@ -554,17 +559,18 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNumberInput, 'P12345')
       await user.type(patientNameInput, '홍길동')
 
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]')!
-        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+        const dateInput = document.querySelector('input[type="date"]');
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
       })
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
 
       await waitFor(() => {
@@ -601,17 +607,18 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNumberInput, 'P12345')
       await user.type(patientNameInput, '홍길동')
 
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]')!
-        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+        const dateInput = document.querySelector('input[type="date"]');
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
       })
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
 
       await waitFor(() => {
@@ -642,17 +649,18 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNumberInput, 'P12345')
       await user.type(patientNameInput, '홍길동')
 
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]')!
-        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+        const dateInput = document.querySelector('input[type="date"]');
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
       })
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
 
       // Wait for success and check reset
@@ -691,18 +699,25 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       // Select two items
-      const checkboxes = screen.getAllByRole('checkbox')
-      await user.click(checkboxes[0])
-      await user.click(checkboxes[1])
+      const checkboxes = screen.getAllByRole('checkbox');
+      if (!checkboxes[0] || !checkboxes[1]) {
+        throw new Error('Required checkboxes not found');
+      }
+      await user.click(checkboxes[0]);
+      await user.click(checkboxes[1]);
 
       // Fill dates
       await waitFor(() => {
-        const dateInputs = document.querySelectorAll('input[type="date"]')
-        fireEvent.change(dateInputs[0], { target: { value: '2024-01-01' } })
-        fireEvent.change(dateInputs[1], { target: { value: '2024-01-15' } })
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        if (!dateInputs[0] || !dateInputs[1]) {
+          throw new Error('Required date inputs not found');
+        }
+        fireEvent.change(dateInputs[0], { target: { value: '2024-01-01' } });
+        fireEvent.change(dateInputs[1], { target: { value: '2024-01-15' } });
       })
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
 
       await waitFor(() => {
@@ -778,7 +793,8 @@ describe('PatientRegistrationForm', () => {
     it('provides ARIA attributes for form validation', async () => {
       await renderWithItems()
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       await act(async () => {
         fireEvent.submit(form)
       })
@@ -847,10 +863,9 @@ describe('PatientRegistrationForm', () => {
       expect(patientNumberInput).toHaveFocus()
 
       // Focus should remain manageable throughout form interaction
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
       
       // Focus should be preserved or handled gracefully
       expect(document.activeElement).toBeDefined()
@@ -884,17 +899,18 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNumberInput, 'P12345')
       await user.type(patientNameInput, '홍길동')
 
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]')!
-        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+        const dateInput = document.querySelector('input[type="date"]');
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
       })
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
 
       await waitFor(() => {
@@ -930,15 +946,12 @@ describe('PatientRegistrationForm', () => {
       const checkbox = screen.getAllByRole('checkbox')[0]
       
       // Test that rapid toggling works - 3 clicks should end up selected
-      if (checkbox) {
-        await user.click(checkbox)
-      } // Selected
-      if (checkbox) {
-        await user.click(checkbox)
-      } // Deselected  
-      if (checkbox) {
-        await user.click(checkbox)
-      } // Selected
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox); // Selected
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox); // Deselected  
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox); // Selected
       
       // Final state should be selected
       await waitFor(() => {
@@ -959,18 +972,19 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNameInput, '홍길동')
 
       // Select item
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       // Set invalid date manually
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement
-        fireEvent.change(dateInput, { target: { value: '' } })
+        const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '' } });
       })
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       
       await act(async () => {
         fireEvent.submit(form)
@@ -1004,17 +1018,18 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNumberInput, 'P12345')
       await user.type(patientNameInput, '홍길동')
 
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]')!
-        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+        const dateInput = document.querySelector('input[type="date"]');
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
       })
 
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
 
       // Wait for error, then check form state is preserved
@@ -1078,18 +1093,19 @@ describe('PatientRegistrationForm', () => {
       await user.type(patientNumberInput, 'P12345')
       await user.type(patientNameInput, '홍길동')
 
-      const checkbox = screen.getAllByRole('checkbox')[0]
-      if (checkbox) {
-        await user.click(checkbox)
-      }
+      const checkbox = screen.getAllByRole('checkbox')[0];
+      if (!checkbox) throw new Error('Checkbox not found');
+      await user.click(checkbox);
 
       await waitFor(() => {
-        const dateInput = document.querySelector('input[type="date"]')!
-        fireEvent.change(dateInput, { target: { value: '2024-01-01' } })
+        const dateInput = document.querySelector('input[type="date"]');
+        if (!dateInput) throw new Error('Date input not found');
+        fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
       })
 
       // Submit form once and verify button becomes disabled during loading
-      const form = document.querySelector('form')!
+      const form = document.querySelector('form');
+      if (!form) throw new Error('Form not found');
       fireEvent.submit(form)
       
       // Verify that during submission, further submissions would be blocked

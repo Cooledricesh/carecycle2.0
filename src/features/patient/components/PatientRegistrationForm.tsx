@@ -56,7 +56,7 @@ export function PatientRegistrationForm() {
     const newSchedule: ScheduleFormData = {
       tempId: `temp_${Date.now()}`,
       itemId: '',
-      firstDate: new Date().toISOString().split('T')[0],
+      firstDate: new Date().toISOString().split('T')[0]!,
       periodValue: 1,
       periodUnit: 'months'
     };
@@ -233,8 +233,8 @@ export function PatientRegistrationForm() {
                                   const selectedItem = availableItems.find(item => item.id === e.target.value);
                                   updateSchedule(schedule.tempId, {
                                     itemId: e.target.value,
-                                    itemName: selectedItem?.name,
-                                    itemType: selectedItem?.type,
+                                    ...(selectedItem?.name !== undefined && { itemName: selectedItem.name }),
+                                    ...(selectedItem?.type !== undefined && { itemType: selectedItem.type }),
                                     periodValue: selectedItem?.periodValue || 1,
                                     periodUnit: selectedItem?.periodUnit || 'months'
                                   });

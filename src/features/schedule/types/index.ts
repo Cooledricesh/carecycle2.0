@@ -39,8 +39,8 @@ export interface TodaySchedulesResponse {
 export interface ScheduleUpdateRequest {
   scheduleId: string;
   isCompleted: boolean;
-  notes?: string;
-  actualCompletionDate?: string;
+  notes?: string | undefined;
+  actualCompletionDate?: string | undefined;
 }
 
 export interface ScheduleUpdateResponse {
