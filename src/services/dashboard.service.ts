@@ -27,7 +27,7 @@ export class DashboardService {
    */
   async getStats(): Promise<DashboardStatsResponse> {
     const { supabase } = this.deps;
-    const today: string = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]!;
     
     // Get total patients count
     const { count: totalPatients, error: patientsError } = await supabase
@@ -136,8 +136,8 @@ export class DashboardService {
 
     const dates = {
       today,
-      weekStart: weekStart.toISOString().split('T')[0],
-      monthStart: monthStart.toISOString().split('T')[0]
+      weekStart: weekStart.toISOString().split('T')[0]!,
+      monthStart: monthStart.toISOString().split('T')[0]!
     };
 
     // Today's completion rate
@@ -209,10 +209,10 @@ export class DashboardService {
 
     return data?.map(item => ({
       id: item.id,
-      patientName: item.patient_schedules.patients.name,
-      patientNumber: item.patient_schedules.patients.patient_number,
-      itemName: item.patient_schedules.items.name,
-      itemType: item.patient_schedules.items.type as 'test' | 'injection',
+      patientName: (item.patient_schedules as any).patients.name,
+      patientNumber: (item.patient_schedules as any).patients.patient_number,
+      itemName: (item.patient_schedules as any).items.name,
+      itemType: (item.patient_schedules as any).items.type as 'test' | 'injection',
       scheduledDate: item.scheduled_date,
       completedDate: item.completed_date,
       actualCompletionDate: item.actual_completion_date,
@@ -223,7 +223,7 @@ export class DashboardService {
 
   private async getUpcomingSchedules(): Promise<UpcomingSchedule[]> {
     const { supabase } = this.deps;
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0]!;
     
     const { data, error } = await supabase
       .from('patient_schedules')
@@ -286,8 +286,8 @@ export class DashboardService {
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
       
-      const startStr = weekStart.toISOString().split('T')[0];
-      const endStr = weekEnd.toISOString().split('T')[0];
+      const startStr = weekStart.toISOString().split('T')[0]!;
+      const endStr = weekEnd.toISOString().split('T')[0]!;
       
       const { data: weekData, error } = await supabase
         .from('schedule_history')
@@ -322,7 +322,7 @@ export class DashboardService {
     // Get counts for each item type from recent activity (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+    const startDate = thirtyDaysAgo.toISOString().split('T')[0]!;
     
     const { data, error } = await supabase
       .from('schedule_history')

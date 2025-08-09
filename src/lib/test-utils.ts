@@ -239,16 +239,20 @@ export const createMockSupabaseClient = () => {
         builder[key].mockImplementation((columns: any, options: any) => {
           // Handle count queries
           if (options?.count === 'exact') {
-            // Return a promise-like object for count queries
-            return {
+            // Return a chainable object for count queries
+            const countBuilder = {
+              eq: jest.fn().mockResolvedValue({ count: 0, error: null }),
+              neq: jest.fn().mockResolvedValue({ count: 0, error: null }),
+              gt: jest.fn().mockResolvedValue({ count: 0, error: null }),
+              gte: jest.fn().mockResolvedValue({ count: 0, error: null }),
+              lt: jest.fn().mockResolvedValue({ count: 0, error: null }),
+              lte: jest.fn().mockResolvedValue({ count: 0, error: null }),
+              in: jest.fn().mockResolvedValue({ count: 0, error: null }),
+              order: jest.fn().mockReturnThis(),
+              limit: jest.fn().mockReturnThis(),
               then: (resolve: any) => resolve({ count: 0, error: null }),
-              eq: () => Promise.resolve({ count: 0, error: null }),
-              neq: () => Promise.resolve({ count: 0, error: null }),
-              gt: () => Promise.resolve({ count: 0, error: null }),
-              gte: () => Promise.resolve({ count: 0, error: null }),
-              lt: () => Promise.resolve({ count: 0, error: null }),
-              lte: () => Promise.resolve({ count: 0, error: null }),
             };
+            return countBuilder;
           }
           return builder;
         });

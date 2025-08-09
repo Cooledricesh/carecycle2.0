@@ -42,9 +42,9 @@ export class PatientService {
         schedule.firstDate,
         {
           value: schedule.periodValue,
-          unit: schedule.periodUnit as 'days' | 'weeks' | 'months' | 'years'
+          unit: schedule.periodUnit as 'weeks' | 'months'
         }
-      ).toISOString().split('T')[0]
+      ).toISOString().split('T')[0]!
     }));
     
     // Call RPC function to register patient with schedules

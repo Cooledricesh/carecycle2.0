@@ -4,11 +4,7 @@
  */
 
 import { DashboardService, createDashboardService } from '../dashboard.service';
-
-// Simple mock Supabase client
-const createMockSupabaseClient = () => ({
-  from: jest.fn(),
-});
+import { createMockSupabaseClient } from '@/lib/test-utils';
 
 describe('DashboardService', () => {
   let mockSupabase: any;
@@ -56,18 +52,23 @@ describe('DashboardService', () => {
       });
 
       // Mock the database calls for patient and schedule counts
-      const mockQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
+      // Mock patients count - returns count directly for head: true
+      mockSupabase.from.mockReturnValueOnce({
+        select: jest.fn().mockResolvedValue({ count: 150, error: null })
+      });
+      
+      // Mock today scheduled count - needs eq chaining
+      const todayScheduledMock = {
+        eq: jest.fn()
       };
+      // First eq returns self, second eq returns promise
+      todayScheduledMock.eq
+        .mockReturnValueOnce(todayScheduledMock) // First .eq() returns self
+        .mockResolvedValueOnce({ count: 25, error: null }); // Second .eq() returns promise
       
-      // Mock patients count
-      mockQueryBuilder.select.mockResolvedValueOnce({ count: 150, error: null });
-      mockSupabase.from.mockReturnValueOnce(mockQueryBuilder);
-      
-      // Mock today scheduled count  
-      mockQueryBuilder.select.mockResolvedValueOnce({ count: 25, error: null });
-      mockSupabase.from.mockReturnValueOnce(mockQueryBuilder);
+      mockSupabase.from.mockReturnValueOnce({
+        select: jest.fn().mockReturnValue(todayScheduledMock)
+      });
 
       const result = await dashboardService.getStats();
 
@@ -169,14 +170,23 @@ describe('DashboardService', () => {
         thisMonth: 0
       });
 
-      const mockQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-      };
+      // Mock null counts for patients
+      mockSupabase.from.mockReturnValueOnce({
+        select: jest.fn().mockResolvedValue({ count: null, error: null })
+      });
       
-      // Mock null counts
-      mockQueryBuilder.select.mockResolvedValue({ count: null, error: null });
-      mockSupabase.from.mockReturnValue(mockQueryBuilder);
+      // Mock null counts for today scheduled - needs eq chaining
+      const todayScheduledNullMock = {
+        eq: jest.fn()
+      };
+      // First eq returns self, second eq returns promise
+      todayScheduledNullMock.eq
+        .mockReturnValueOnce(todayScheduledNullMock) // First .eq() returns self
+        .mockResolvedValueOnce({ count: null, error: null }); // Second .eq() returns promise
+      
+      mockSupabase.from.mockReturnValueOnce({
+        select: jest.fn().mockReturnValue(todayScheduledNullMock)
+      });
 
       const result = await dashboardService.getStats();
       

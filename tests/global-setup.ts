@@ -11,7 +11,7 @@ import * as fs from 'fs';
 async function globalSetup(config: FullConfig) {
   console.log('🔧 Starting global authentication setup...');
   
-  const baseURL = config.projects[0].use.baseURL || 'http://localhost:3000';
+  const baseURL = config.projects?.[0]?.use?.baseURL || 'http://localhost:3000';
   
   // Check if auth file already exists and is recent (less than 1 hour old)
   const storageStatePath = path.join(process.cwd(), 'tests', 'storage', 'auth.json');

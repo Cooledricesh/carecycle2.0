@@ -167,7 +167,7 @@ export class ScheduleService {
     }
 
     // Filter overdue items that are not completed
-    const overdueSchedules = (data || []).filter(schedule => {
+    const overdueSchedules = (data || []).filter((schedule: any) => {
       const historyForDueDate = schedule.schedule_history.find(
         (h: any) => h.scheduled_date === schedule.next_due_date
       );
@@ -231,7 +231,7 @@ export class ScheduleService {
     }
 
     // Filter schedules that are not yet completed
-    const upcomingSchedules = (data || []).filter(schedule => {
+    const upcomingSchedules = (data || []).filter((schedule: any) => {
       const historyForDueDate = schedule.schedule_history.find(
         (h: any) => h.scheduled_date === schedule.next_due_date
       );
@@ -273,7 +273,7 @@ export class ScheduleService {
     }
 
     const todayTotal = todaySchedules?.length || 0;
-    const todayCompleted = todaySchedules?.filter(s => s.status === 'completed').length || 0;
+    const todayCompleted = todaySchedules?.filter((s: any) => s.status === 'completed').length || 0;
     const todayCompletionRate = todayTotal > 0 ? (todayCompleted / todayTotal) * 100 : 0;
 
     // Get overdue count
