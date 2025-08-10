@@ -24,8 +24,47 @@ export class DashboardService {
 
   /**
    * Get dashboard statistics including patient count, today's schedule, and completion rates
+   * Now optimized with single database function call
    */
   async getStats(): Promise<DashboardStatsResponse> {
+    const { supabase } = this.deps;
+    const today = new Date().toISOString().split('T')[0]!;
+    
+    try {
+      // Use optimized database function for all stats in single call
+      const { data, error } = await supabase.rpc('get_dashboard_stats', {
+        target_date: today
+      });
+
+      if (error) {
+        throw new Error(`Failed to fetch dashboard stats: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('No dashboard stats returned from database');
+      }
+
+      return {
+        totalPatients: data.totalPatients || 0,
+        todayScheduled: data.todayScheduled || 0,
+        completionRates: {
+          today: data.completionRates?.today || 0,
+          thisWeek: data.completionRates?.thisWeek || 0,
+          thisMonth: data.completionRates?.thisMonth || 0
+        },
+        overdueItems: data.overdueItems || 0
+      };
+    } catch (error) {
+      // Fallback to original implementation if RPC fails
+      console.warn('Dashboard RPC failed, falling back to original implementation:', error);
+      return this.getStatsLegacy();
+    }
+  }
+
+  /**
+   * Legacy implementation as fallback
+   */
+  private async getStatsLegacy(): Promise<DashboardStatsResponse> {
     const { supabase } = this.deps;
     const today = new Date().toISOString().split('T')[0]!;
     
@@ -65,8 +104,41 @@ export class DashboardService {
 
   /**
    * Get recent activity and upcoming schedules
+   * Now optimized with database functions
    */
   async getRecentData(): Promise<DashboardRecentResponse> {
+    const { supabase } = this.deps;
+
+    try {
+      // Use optimized database functions
+      const [recentResult, upcomingResult] = await Promise.all([
+        supabase.rpc('get_recent_dashboard_activity', { activity_limit: 10 }),
+        supabase.rpc('get_upcoming_dashboard_schedules', { schedule_limit: 10 })
+      ]);
+
+      if (recentResult.error) {
+        throw new Error(`Failed to fetch recent activity: ${recentResult.error.message}`);
+      }
+
+      if (upcomingResult.error) {
+        throw new Error(`Failed to fetch upcoming schedules: ${upcomingResult.error.message}`);
+      }
+
+      return {
+        recentActivity: recentResult.data || [],
+        upcomingSchedules: upcomingResult.data || []
+      };
+    } catch (error) {
+      // Fallback to original implementation
+      console.warn('Dashboard recent data RPC failed, falling back:', error);
+      return this.getRecentDataLegacy();
+    }
+  }
+
+  /**
+   * Legacy implementation for recent data
+   */
+  private async getRecentDataLegacy(): Promise<DashboardRecentResponse> {
     const [recentActivity, upcomingSchedules] = await Promise.all([
       this.getRecentActivity(),
       this.getUpcomingSchedules()
@@ -80,8 +152,38 @@ export class DashboardService {
 
   /**
    * Get dashboard trends including weekly completion rates and item type distribution
+   * Now optimized with single database function
    */
   async getTrends(): Promise<DashboardTrendsResponse> {
+    const { supabase } = this.deps;
+
+    try {
+      // Use optimized database function for trends
+      const { data, error } = await supabase.rpc('get_dashboard_trends');
+
+      if (error) {
+        throw new Error(`Failed to fetch dashboard trends: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('No trends data returned from database');
+      }
+
+      return {
+        weeklyCompletionRates: data.weeklyCompletionRates || [],
+        itemTypeDistribution: data.itemTypeDistribution || []
+      };
+    } catch (error) {
+      // Fallback to original implementation
+      console.warn('Dashboard trends RPC failed, falling back:', error);
+      return this.getTrendsLegacy();
+    }
+  }
+
+  /**
+   * Legacy implementation for trends
+   */
+  private async getTrendsLegacy(): Promise<DashboardTrendsResponse> {
     const [weeklyCompletionRates, itemTypeDistribution] = await Promise.all([
       this.getWeeklyCompletionRates(),
       this.getItemTypeDistribution()
